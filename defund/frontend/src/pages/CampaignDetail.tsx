@@ -8,8 +8,9 @@ import {
     Clock,
     AlertCircle,
     Users,
-    DollarSign,
-    Play
+    Wallet,
+    Play,
+    FileText
 } from 'lucide-react';
 import { campaignStore } from '../store/campaigns';
 
@@ -25,29 +26,26 @@ const CONTRACT_ABI = [
 
 export default function CampaignDetail() {
     const { id } = useParams();
-    const [contributeAmount, setContributeAmount] = useState('0.1');
+    const [contributeAmount, setContributeAmount] = useState('0.001');
     const [isContributing, setIsContributing] = useState(false);
     const [isVerifying, setIsVerifying] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [txHash, setTxHash] = useState<string | null>(null);
+    const [activeTab, setActiveTab] = useState('overview');
 
     const campaignId = Number(id);
-    // Use state to trigger re-renders on store updates
     const [campaign, setCampaign] = useState(campaignStore.getById(campaignId));
     const [isLoading, setIsLoading] = useState(campaignStore.isLoading);
 
     useEffect(() => {
-        // Initial set
         setCampaign(campaignStore.getById(campaignId));
         setIsLoading(campaignStore.isLoading);
 
-        // Subscribe to store updates
         const unsubscribe = campaignStore.subscribe(() => {
             setCampaign(campaignStore.getById(campaignId));
             setIsLoading(campaignStore.isLoading);
         });
 
-        // Trigger fetch if empty and no campaign found
         if (!campaignStore.getById(campaignId) && !campaignStore.isLoading) {
             campaignStore.fetchCampaigns();
         }
@@ -55,11 +53,11 @@ export default function CampaignDetail() {
         return () => unsubscribe();
     }, [campaignId]);
 
-    // Show loading state
+    // Loading state
     if (isLoading && !campaign) {
         return (
             <div style={{ textAlign: 'center', padding: '64px' }}>
-                <div className="btn-neon" style={{ display: 'inline-block', border: 'none' }}>
+                <div className="card-flat" style={{ display: 'inline-block', padding: '24px 48px' }}>
                     Loading Campaign Data...
                 </div>
             </div>
@@ -70,21 +68,21 @@ export default function CampaignDetail() {
         return (
             <div style={{ textAlign: 'center', padding: '48px' }}>
                 <h1 style={{ fontSize: '24px', marginBottom: '16px' }}>Campaign Not Found</h1>
-                <Link to="/campaigns" className="btn-secondary">Back to Campaigns</Link>
+                <Link to="/explore" className="btn btn-ghost">Back to Explore</Link>
             </div>
         );
     }
 
-    const getMilestoneIcon = (state: string) => {
+    const getMilestoneStatus = (state: string) => {
         switch (state) {
             case 'PASSED':
-                return <CheckCircle style={{ width: '28px', height: '28px', color: '#B6F35C' }} />;
+                return { icon: <CheckCircle style={{ width: '20px', height: '20px', color: 'var(--success)' }} />, label: 'Verified', className: 'pill-verified' };
             case 'SUBMITTED':
-                return <Clock style={{ width: '28px', height: '28px', color: '#FBB524' }} />;
+                return { icon: <Clock style={{ width: '20px', height: '20px', color: 'var(--warning)' }} />, label: 'Pending', className: 'pill-pending' };
             case 'FAILED':
-                return <AlertCircle style={{ width: '28px', height: '28px', color: '#EF4444' }} />;
+                return { icon: <AlertCircle style={{ width: '20px', height: '20px', color: 'var(--danger)' }} />, label: 'Failed', className: 'pill-at-risk' };
             default:
-                return <div style={{ width: '28px', height: '28px', borderRadius: '50%', border: '2px solid #6B7280' }} />;
+                return { icon: <Clock style={{ width: '20px', height: '20px', color: 'var(--text-muted)' }} />, label: 'Upcoming', className: '' };
         }
     };
 
@@ -95,7 +93,7 @@ export default function CampaignDetail() {
         }
 
         if (campaignId >= 1000) {
-            alert('This is a demo campaign (ID >= 1000). Please create a new campaign to test real blockchain contributions.');
+            alert('This is a demo campaign. Please create a new campaign to test real blockchain contributions.');
             return;
         }
 
@@ -105,50 +103,26 @@ export default function CampaignDetail() {
         try {
             const provider = new ethers.BrowserProvider(window.ethereum);
             const signer = await provider.getSigner();
-
-            // Create contract instance
             const contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, signer);
-
-            // Amount in wei
             const amountInWei = ethers.parseEther(contributeAmount);
 
-            console.log(`Contributing ${contributeAmount} MON to campaign ${campaignId}...`);
-
-            // Send transaction
             const tx = await contract.contribute(campaignId, {
                 value: amountInWei,
-                gasLimit: 150000 // Reasonable limit for contribution
+                gasLimit: 500000 // Increased to prevent out-of-gas errors
             });
 
-            console.log('Transaction sent:', tx.hash);
             setTxHash(tx.hash);
+            await tx.wait();
 
-            const receipt = await tx.wait();
-            console.log('Transaction confirmed:', receipt);
-
-            // Update local store to reflect contribution immediately
             campaignStore.contribute(campaignId, parseFloat(contributeAmount));
-
-            // Refresh from blockchain
             await campaignStore.fetchCampaigns();
 
             alert(`✅ Contribution successful! Added ${contributeAmount} MON to campaign.`);
-
         } catch (error: any) {
-            console.error('Contribution failed:', error);
             let errorMessage = error.message || 'Unknown error';
-
-            // Parse common contract errors
-            if (errorMessage.includes('rejected')) {
-                errorMessage = 'Transaction rejected by user';
-            } else if (errorMessage.includes('Campaign not active')) {
-                errorMessage = 'This campaign is no longer accepting contributions.';
-            } else if (errorMessage.includes('execution reverted')) {
-                errorMessage = 'Transaction failed. The campaign may be closed or failed.';
-            } else if (errorMessage.includes('insufficient funds')) {
-                errorMessage = 'Insufficient MON for this transaction.';
-            }
-
+            if (errorMessage.includes('rejected')) errorMessage = 'Transaction rejected by user';
+            else if (errorMessage.includes('Campaign not active')) errorMessage = 'This campaign is no longer accepting contributions.';
+            else if (errorMessage.includes('insufficient funds')) errorMessage = 'Insufficient MON for this transaction.';
             alert(`❌ Contribution failed: ${errorMessage}`);
         } finally {
             setIsContributing(false);
@@ -167,16 +141,11 @@ export default function CampaignDetail() {
             const signer = await provider.getSigner();
             const contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, signer);
 
-            console.log(`Submitting proof for milestone ${milestoneIndex}...`);
-            // Note: Contract automatically determines milestone index based on currentMilestone
             const tx = await contract.submitMilestone(campaignId, proofUrl);
-            console.log('Tx sent:', tx.hash);
-
             await tx.wait();
-            alert('✅ Proof submitted! Refreshing...');
-            await campaignStore.fetchCampaigns(); // Refresh to show "SUBMITTED" state
+            alert('✅ Proof submitted!');
+            await campaignStore.fetchCampaigns();
         } catch (error: any) {
-            console.error(error);
             alert('Submission failed: ' + error.message);
         } finally {
             setIsSubmitting(false);
@@ -190,7 +159,7 @@ export default function CampaignDetail() {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    campaignId: campaignId,
+                    campaignId,
                     milestoneIndex,
                     milestoneDescription: campaign.milestones[milestoneIndex].description,
                     proofUrl: campaign.milestones[milestoneIndex].proofUrl || 'https://github.com/defund/demo-proof',
@@ -205,238 +174,263 @@ export default function CampaignDetail() {
                 } else {
                     alert(`❌ Verification Failed.\nReason: ${result.verification?.agentVotes[0]?.reasoning || 'Proof insufficient'}`);
                 }
-            } else {
-                alert(`Verification requested: ${result.message || 'Check backend logs'}`);
             }
+            await campaignStore.fetchCampaigns();
         } catch (e: any) {
-            alert('Verification request sent/failed: ' + e.message);
+            alert('Verification error: ' + e.message);
         }
         setIsVerifying(false);
+    };
+
+    const getStatusBadge = () => {
+        if (campaign.milestones.some(m => m.state === 'PASSED')) {
+            return <span className="pill pill-verified"><CheckCircle style={{ width: '14px', height: '14px' }} /> AI Verified</span>;
+        }
+        if (campaign.milestones.some(m => m.state === 'SUBMITTED')) {
+            return <span className="pill pill-pending"><Clock style={{ width: '14px', height: '14px' }} /> Pending Review</span>;
+        }
+        if (campaign.state === 'FAILED') {
+            return <span className="pill pill-at-risk"><AlertCircle style={{ width: '14px', height: '14px' }} /> At Risk</span>;
+        }
+        return null;
     };
 
     return (
         <div>
             {/* Back Button */}
-            <Link to="/campaigns" style={{
+            <Link to="/explore" style={{
                 display: 'inline-flex',
                 alignItems: 'center',
-                gap: '8px',
-                color: '#9CA3AF',
+                gap: '6px',
+                color: 'var(--text-muted)',
                 textDecoration: 'none',
-                marginBottom: '32px'
+                marginBottom: '24px',
+                fontSize: '14px'
             }}>
-                <ArrowLeft style={{ width: '18px', height: '18px' }} />
-                Back to Campaigns
+                <ArrowLeft style={{ width: '16px', height: '16px' }} />
+                Back to Explore
             </Link>
 
-            {/* Hero */}
-            <section style={{ marginBottom: '48px' }}>
-                <div className="glass-card">
-                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '32px', justifyContent: 'space-between' }}>
-                        <div style={{ flex: '1', minWidth: '300px' }}>
-                            <span className={`badge ${campaign.state === 'ACTIVE' ? 'badge-active' : campaign.state === 'COMPLETED' ? 'badge-pass' : 'badge-fail'}`} style={{ marginBottom: '16px', display: 'inline-block' }}>
-                                {campaign.state}
-                            </span>
-                            <h1 style={{ fontSize: '32px', fontWeight: 700, marginBottom: '16px' }}>{campaign.title}</h1>
-                            <p style={{ color: '#9CA3AF', marginBottom: '20px', lineHeight: 1.7 }}>{campaign.description}</p>
+            {/* Two Column Layout */}
+            <div className="two-column">
+                {/* Main Content */}
+                <div>
+                    {/* Header */}
+                    <div style={{ marginBottom: '24px' }}>
+                        <div style={{ display: 'flex', gap: '8px', marginBottom: '12px', flexWrap: 'wrap' }}>
+                            <span className="tag">{campaign.state === 'ACTIVE' ? 'Funding' : campaign.state}</span>
+                            <span className="tag">Monad</span>
+                        </div>
+                        <h1 style={{ fontSize: '1.75rem', fontWeight: 700, marginBottom: '12px' }}>{campaign.title}</h1>
+                        <p style={{ color: 'var(--text-muted)', lineHeight: 1.7 }}>{campaign.description}</p>
+                    </div>
 
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', fontSize: '14px', color: '#9CA3AF' }}>
-                                <span>Created by</span>
-                                <code className="glass" style={{ padding: '6px 12px', borderRadius: '8px', fontSize: '12px' }}>
-                                    {campaign.creator.slice(0, 10)}...{campaign.creator.slice(-8)}
-                                </code>
-                                <a href={`https://testnet.monadexplorer.com/address/${CONTRACT_ADDRESS}`} target="_blank" rel="noopener noreferrer" style={{ color: '#B6F35C', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                                    View on Explorer <ExternalLink style={{ width: '14px', height: '14px' }} />
-                                </a>
+                    {/* Tabs */}
+                    <div style={{
+                        display: 'flex',
+                        gap: '4px',
+                        borderBottom: '1px solid var(--border)',
+                        marginBottom: '24px'
+                    }}>
+                        {['overview', 'milestones', 'updates'].map(tab => (
+                            <button
+                                key={tab}
+                                onClick={() => setActiveTab(tab)}
+                                style={{
+                                    padding: '12px 20px',
+                                    background: 'transparent',
+                                    border: 'none',
+                                    borderBottom: activeTab === tab ? '2px solid var(--accent)' : '2px solid transparent',
+                                    color: activeTab === tab ? 'var(--text-primary)' : 'var(--text-muted)',
+                                    fontWeight: activeTab === tab ? 500 : 400,
+                                    cursor: 'pointer',
+                                    fontSize: '14px',
+                                    textTransform: 'capitalize'
+                                }}
+                            >
+                                {tab}
+                            </button>
+                        ))}
+                    </div>
+
+                    {/* Tab Content */}
+                    {activeTab === 'overview' && (
+                        <div>
+                            <div className="card" style={{ marginBottom: '16px' }}>
+                                <h3 style={{ fontSize: '1rem', fontWeight: 600, marginBottom: '12px' }}>About this project</h3>
+                                <p style={{ color: 'var(--text-secondary)', lineHeight: 1.7 }}>
+                                    {campaign.description}
+                                </p>
+                            </div>
+                            <div className="card">
+                                <h3 style={{ fontSize: '1rem', fontWeight: 600, marginBottom: '12px' }}>Why DeFund?</h3>
+                                <ul style={{ color: 'var(--text-secondary)', lineHeight: 1.8, paddingLeft: '20px' }}>
+                                    <li>Funds locked in smart contracts until milestones pass</li>
+                                    <li>AI verification ensures accountability</li>
+                                    <li>Automatic refunds if milestones fail</li>
+                                </ul>
+                            </div>
+                        </div>
+                    )}
+
+                    {activeTab === 'milestones' && (
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                            {campaign.milestones.map((milestone, index) => {
+                                const status = getMilestoneStatus(milestone.state);
+                                const isCurrent = index === campaign.currentMilestone;
+                                return (
+                                    <div key={index} className="card" style={{
+                                        border: isCurrent ? '2px solid var(--accent)' : undefined
+                                    }}>
+                                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '12px' }}>
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                                                {status.icon}
+                                                <div>
+                                                    <h4 style={{ fontWeight: 600, marginBottom: '2px' }}>Milestone {index + 1}</h4>
+                                                    <p style={{ fontSize: '14px', color: 'var(--text-muted)' }}>{milestone.description}</p>
+                                                </div>
+                                            </div>
+                                            <span className={`pill ${status.className}`} style={{ fontSize: '12px' }}>
+                                                {status.label}
+                                            </span>
+                                        </div>
+
+                                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '13px', color: 'var(--text-muted)' }}>
+                                            <span>{milestone.allocation}% of funds</span>
+                                            {isCurrent && milestone.state === 'PENDING' && campaign.state === 'ACTIVE' && (
+                                                <button
+                                                    onClick={() => handleSubmitProof(index)}
+                                                    disabled={isSubmitting}
+                                                    className="btn btn-ghost btn-sm"
+                                                >
+                                                    <FileText style={{ width: '14px', height: '14px' }} />
+                                                    {isSubmitting ? 'Submitting...' : 'Submit Proof'}
+                                                </button>
+                                            )}
+                                            {milestone.state === 'SUBMITTED' && (
+                                                <button
+                                                    onClick={() => handleVerify(index)}
+                                                    disabled={isVerifying}
+                                                    className="btn btn-primary btn-sm"
+                                                >
+                                                    <Play style={{ width: '14px', height: '14px' }} />
+                                                    {isVerifying ? 'Verifying...' : 'Verify with AI'}
+                                                </button>
+                                            )}
+                                        </div>
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    )}
+
+                    {activeTab === 'updates' && (
+                        <div className="card-flat" style={{ textAlign: 'center', padding: '48px' }}>
+                            <Clock style={{ width: '32px', height: '32px', margin: '0 auto 12px', color: 'var(--text-muted)' }} />
+                            <p style={{ color: 'var(--text-muted)' }}>No updates yet</p>
+                        </div>
+                    )}
+                </div>
+
+                {/* Sidebar */}
+                <div>
+                    <div className="card" style={{ position: 'sticky', top: '80px' }}>
+                        {/* Progress */}
+                        <div style={{ marginBottom: '20px' }}>
+                            <div className="progress-bar" style={{ height: '10px', marginBottom: '12px' }}>
+                                <div className="progress-fill" style={{ width: `${campaign.progress}%` }}></div>
+                            </div>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '14px' }}>
+                                <span style={{ fontWeight: 600 }}>{campaign.raisedAmount}</span>
+                                <span style={{ color: 'var(--text-muted)' }}>of {campaign.fundingGoal}</span>
+                            </div>
+                            <div style={{ fontSize: '24px', fontWeight: 700, color: 'var(--accent)', marginTop: '4px' }}>
+                                {campaign.progress}% funded
+                            </div>
+                        </div>
+
+                        {/* AI Status */}
+                        <div style={{ marginBottom: '20px', padding: '16px', background: 'var(--bg-secondary)', borderRadius: 'var(--radius-lg)' }}>
+                            <div style={{ fontSize: '13px', color: 'var(--text-muted)', marginBottom: '8px' }}>AI verification status</div>
+                            {getStatusBadge() || <span className="pill" style={{ background: 'var(--bg-tertiary)', color: 'var(--text-muted)' }}>Not started</span>}
+                            <div style={{ fontSize: '12px', color: 'var(--text-muted)', marginTop: '8px' }}>
+                                Milestone {campaign.currentMilestone + 1} of {campaign.totalMilestones}
                             </div>
                         </div>
 
                         {/* Stats */}
-                        <div style={{ width: '320px' }}>
-                            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', marginBottom: '12px' }}>
-                                <span style={{ fontSize: '32px', fontWeight: 700, color: '#B6F35C', fontFamily: 'JetBrains Mono, monospace' }}>
-                                    {campaign.raisedAmount}
-                                </span>
-                                <span style={{ color: '#9CA3AF', fontSize: '14px' }}>
-                                    raised of {campaign.fundingGoal} goal
-                                </span>
-                            </div>
-
-                            <div className="progress-bar" style={{ height: '12px', marginBottom: '20px' }}>
-                                <div className="progress-fill" style={{
-                                    width: `${campaign.progress}%`,
-                                    background: campaign.state === 'FAILED' ? '#EF4444' : 'linear-gradient(90deg, #A3E635 0%, #22C55E 100%)'
-                                }}></div>
-                            </div>
-
-                            <div style={{ display: 'flex', gap: '24px', fontSize: '14px' }}>
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#9CA3AF' }}>
-                                    <Users style={{ width: '16px', height: '16px' }} />
-                                    <span>{campaign.backers} backers</span>
-                                </div>
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#9CA3AF' }}>
-                                    <DollarSign style={{ width: '16px', height: '16px' }} />
-                                    <span>{campaign.progress.toFixed(1)}% funded</span>
-                                </div>
+                        <div style={{ display: 'flex', gap: '16px', marginBottom: '20px', fontSize: '14px' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: 'var(--text-secondary)' }}>
+                                <Users style={{ width: '16px', height: '16px' }} />
+                                {campaign.backers} backers
                             </div>
                         </div>
-                    </div>
-                </div>
-            </section>
 
-            {/* Content Grid */}
-            <section>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '32px' }}>
-                    {/* Milestones */}
-                    <div>
-                        <h2 style={{ fontSize: '20px', fontWeight: 700, marginBottom: '24px' }}>Milestones</h2>
-
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-                            {campaign.milestones.map((milestone, i) => (
-                                <div key={i} className="glass-card">
-                                    <div style={{ display: 'flex', gap: '20px' }}>
-                                        {getMilestoneIcon(milestone.state)}
-
-                                        <div style={{ flex: 1 }}>
-                                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
-                                                <h3 style={{ fontWeight: 600 }}>Milestone {i + 1}</h3>
-                                                <span className={`badge ${milestone.state === 'PASSED' ? 'badge-pass' :
-                                                    milestone.state === 'SUBMITTED' ? 'badge-pending' :
-                                                        milestone.state === 'FAILED' ? 'badge-fail' : ''
-                                                    }`}>
-                                                    {milestone.state}
-                                                </span>
-                                            </div>
-
-                                            <p style={{ color: '#9CA3AF', fontSize: '14px', marginBottom: '16px' }}>{milestone.description}</p>
-
-                                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
-                                                <span style={{ fontSize: '14px', color: '#B6F35C', fontFamily: 'JetBrains Mono, monospace' }}>
-                                                    {milestone.allocation}% allocated
-                                                </span>
-
-                                                {milestone.state === 'PENDING' && i === campaign.currentMilestone && (
-                                                    <button
-                                                        onClick={() => handleSubmitProof(i)}
-                                                        disabled={isSubmitting}
-                                                        className="btn-secondary"
-                                                        style={{ padding: '6px 12px', fontSize: '12px' }}
-                                                    >
-                                                        {isSubmitting ? 'Submitting...' : 'Submit Proof'}
-                                                    </button>
-                                                )}
-
-                                                {milestone.state === 'SUBMITTED' && (
-                                                    <button
-                                                        onClick={() => handleVerify(i)}
-                                                        disabled={isVerifying}
-                                                        className="btn-neon"
-                                                        style={{ padding: '10px 20px', fontSize: '14px' }}
-                                                    >
-                                                        <Play style={{ width: '16px', height: '16px' }} />
-                                                        {isVerifying ? 'Verifying...' : 'Trigger AI Verification'}
-                                                    </button>
-                                                )}
-
-                                                {milestone.state === 'PASSED' && (
-                                                    <span style={{ fontSize: '14px', color: '#9CA3AF' }}>
-                                                        Verified by Gemini
-                                                    </span>
-                                                )}
-                                            </div>
-                                        </div>
-                                    </div>
+                        {/* Back Form */}
+                        {campaign.state === 'ACTIVE' && (
+                            <>
+                                <div style={{ marginBottom: '12px' }}>
+                                    <label style={{ fontSize: '13px', color: 'var(--text-muted)', display: 'block', marginBottom: '6px' }}>Amount (MON)</label>
+                                    <input
+                                        type="number"
+                                        value={contributeAmount}
+                                        onChange={(e) => setContributeAmount(e.target.value)}
+                                        className="input"
+                                        step="0.001"
+                                        min="0.001"
+                                    />
                                 </div>
-                            ))}
-                        </div>
-                    </div>
+                                <button
+                                    onClick={handleContribute}
+                                    disabled={isContributing}
+                                    className="btn btn-primary"
+                                    style={{ width: '100%' }}
+                                >
+                                    <Wallet style={{ width: '16px', height: '16px' }} />
+                                    {isContributing ? 'Processing...' : 'Back this project'}
+                                </button>
+                            </>
+                        )}
 
-                    {/* Contribute Panel */}
-                    <div className="glass-card">
-                        <h3 style={{ fontWeight: 700, marginBottom: '24px' }}>Contribute (Real Transaction)</h3>
-
-                        {campaignId >= 1000 && (
-                            <div style={{ marginBottom: '16px', padding: '12px', background: 'rgba(239, 68, 68, 0.1)', borderRadius: '12px', border: '1px solid rgba(239, 68, 68, 0.3)' }}>
-                                <p style={{ fontSize: '12px', color: '#EF4444' }}>
-                                    ⚠️ This is a demo campaign. Real contributions are disabled. Create a new campaign to test on-chain features.
-                                </p>
+                        {campaign.state === 'FAILED' && (
+                            <div style={{ padding: '16px', background: 'var(--danger-light)', borderRadius: 'var(--radius)', textAlign: 'center' }}>
+                                <p style={{ color: '#991B1B', fontSize: '14px' }}>This campaign has failed. Backers can claim refunds.</p>
+                                <Link to="/refunds" className="btn btn-ghost" style={{ marginTop: '12px' }}>
+                                    View Refunds
+                                </Link>
                             </div>
                         )}
 
-                        <div style={{ marginBottom: '20px' }}>
-                            <label style={{ display: 'block', fontSize: '14px', color: '#9CA3AF', marginBottom: '10px' }}>
-                                Amount (MON)
-                            </label>
-                            <input
-                                type="number"
-                                value={contributeAmount}
-                                onChange={(e) => setContributeAmount(e.target.value)}
-                                className="input-glass"
-                                step="any"
-                                min="0.001"
-                                disabled={campaignId >= 1000}
-                            />
+                        {/* Explorer Link */}
+                        <div style={{ marginTop: '20px', paddingTop: '16px', borderTop: '1px solid var(--border)' }}>
+                            <a
+                                href={`https://testnet.monadexplorer.com/address/${CONTRACT_ADDRESS}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                style={{
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '6px',
+                                    color: 'var(--text-muted)',
+                                    textDecoration: 'none',
+                                    fontSize: '13px'
+                                }}
+                            >
+                                View on Monad Explorer
+                                <ExternalLink style={{ width: '14px', height: '14px' }} />
+                            </a>
                         </div>
-
-                        <button
-                            onClick={handleContribute}
-                            disabled={isContributing || campaignId >= 1000 || campaign.state !== 'ACTIVE'}
-                            className="btn-neon"
-                            style={{
-                                width: '100%',
-                                justifyContent: 'center',
-                                marginBottom: '16px',
-                                opacity: (campaignId >= 1000 || campaign.state !== 'ACTIVE') ? 0.5 : 1,
-                                cursor: (campaignId >= 1000 || campaign.state !== 'ACTIVE') ? 'not-allowed' : 'pointer'
-                            }}
-                        >
-                            {campaign.state !== 'ACTIVE'
-                                ? `Campaign ${campaign.state}`
-                                : isContributing
-                                    ? 'Confirm in MetaMask...'
-                                    : `Contribute ${contributeAmount} MON`}
-                        </button>
 
                         {txHash && (
-                            <div style={{ marginBottom: '16px', padding: '12px', background: 'rgba(182,243,92,0.1)', borderRadius: '12px' }}>
-                                <p style={{ fontSize: '12px', color: '#B6F35C', marginBottom: '4px' }}>Transaction Sent!</p>
-                                <a
-                                    href={`https://testnet.monadexplorer.com/tx/${txHash}`}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    style={{ fontSize: '12px', color: '#B6F35C', wordBreak: 'break-all' }}
-                                >
-                                    View on Explorer →
+                            <div style={{ marginTop: '12px', padding: '12px', background: 'var(--success-light)', borderRadius: 'var(--radius)', fontSize: '12px' }}>
+                                <a href={`https://testnet.monadexplorer.com/tx/${txHash}`} target="_blank" rel="noopener" style={{ color: '#166534' }}>
+                                    View transaction →
                                 </a>
                             </div>
                         )}
-
-                        <p style={{ fontSize: '12px', color: '#6B7280', textAlign: 'center' }}>
-                            Funds are sent to smart contract escrow on Monad testnet
-                        </p>
-                    </div>
-
-                    <div className="glass-card">
-                        <h3 style={{ fontWeight: 700, marginBottom: '20px' }}>Contract Info</h3>
-                        <div style={{ fontSize: '14px' }}>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '12px' }}>
-                                <span style={{ color: '#9CA3AF' }}>Network</span>
-                                <span style={{ color: '#B6F35C' }}>Monad Testnet</span>
-                            </div>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '12px' }}>
-                                <span style={{ color: '#9CA3AF' }}>Contract</span>
-                                <a href={`https://testnet.monadexplorer.com/address/${CONTRACT_ADDRESS}`} target="_blank" rel="noopener noreferrer" style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: '12px', color: '#B6F35C' }}>
-                                    {CONTRACT_ADDRESS.slice(0, 8)}...{CONTRACT_ADDRESS.slice(-6)}
-                                </a>
-                            </div>
-                            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                                <span style={{ color: '#9CA3AF' }}>Campaign ID</span>
-                                <span style={{ fontFamily: 'JetBrains Mono, monospace' }}>{id}</span>
-                            </div>
-                        </div>
                     </div>
                 </div>
-            </section>
+            </div>
         </div>
     );
 }

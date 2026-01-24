@@ -1,16 +1,6 @@
-import { type ReactNode, useState } from 'react';
+import { type ReactNode, useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import {
-    LayoutDashboard,
-    FolderOpen,
-    PlusCircle,
-    Shield,
-    Wallet,
-    Menu,
-    X,
-    Zap,
-    RefreshCw
-} from 'lucide-react';
+import { Wallet, Menu, X } from 'lucide-react';
 
 interface LayoutProps {
     children: ReactNode;
@@ -29,11 +19,9 @@ export default function Layout({ children }: LayoutProps) {
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
     const navItems = [
-        { path: '/', label: 'Dashboard', icon: LayoutDashboard },
-        { path: '/campaigns', label: 'Campaigns', icon: FolderOpen },
-        { path: '/create', label: 'Create', icon: PlusCircle },
-        { path: '/verification', label: 'Verification', icon: Shield },
-        { path: '/refunds', label: 'Refunds', icon: RefreshCw },
+        { path: '/explore', label: 'Explore' },
+        { path: '/dashboard', label: 'Dashboard' },
+        { path: '/verification', label: 'How it works' },
     ];
 
     const connectWallet = async () => {
@@ -68,7 +56,7 @@ export default function Layout({ children }: LayoutProps) {
     };
 
     // Auto-connect on mount
-    useState(() => {
+    useEffect(() => {
         const checkConnection = async () => {
             if (typeof window.ethereum !== 'undefined') {
                 try {
@@ -83,166 +71,196 @@ export default function Layout({ children }: LayoutProps) {
             }
         };
         checkConnection();
-    });
+    }, []);
 
     const formatAddress = (address: string) => {
         return `${address.slice(0, 6)}...${address.slice(-4)}`;
     };
 
     return (
-        <div style={{ minHeight: '100vh', backgroundColor: '#0B0F0C' }}>
-            {/* Top Navigation */}
+        <div style={{ minHeight: '100vh', backgroundColor: 'var(--bg-primary)' }}>
+            {/* Navigation */}
             <nav style={{
-                position: 'fixed',
+                position: 'sticky',
                 top: 0,
-                left: 0,
-                right: 0,
                 zIndex: 50,
-                padding: '16px 24px'
+                backgroundColor: 'var(--bg-primary)',
+                borderBottom: '1px solid var(--border)'
             }}>
-                <div style={{ maxWidth: '1400px', margin: '0 auto' }}>
-                    <div className="glass-card" style={{
+                <div style={{
+                    maxWidth: '1120px',
+                    margin: '0 auto',
+                    padding: '0 16px',
+                    height: '64px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between'
+                }}>
+                    {/* Logo */}
+                    <Link to="/" style={{
                         display: 'flex',
-                        justifyContent: 'space-between',
                         alignItems: 'center',
-                        padding: '16px 28px'
+                        gap: '8px',
+                        textDecoration: 'none',
+                        color: 'var(--text-primary)',
+                        fontWeight: 700,
+                        fontSize: '20px'
                     }}>
-                        {/* Logo */}
-                        <Link to="/" style={{ display: 'flex', alignItems: 'center', gap: '12px', textDecoration: 'none' }}>
-                            <div style={{
-                                width: '44px',
-                                height: '44px',
-                                borderRadius: '14px',
-                                background: 'linear-gradient(135deg, #B6F35C 0%, #4ADE80 100%)',
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center'
-                            }}>
-                                <Zap style={{ width: '24px', height: '24px', color: '#0B0F0C' }} />
-                            </div>
-                            <span style={{ fontSize: '22px', fontWeight: 700, color: 'white' }}>DeFund</span>
-                        </Link>
+                        <svg width="28" height="28" viewBox="0 0 32 32" fill="none">
+                            <rect width="32" height="32" rx="8" fill="#2563EB" />
+                            <path d="M10 16L14 20L22 12" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+                        </svg>
+                        DeFund
+                    </Link>
 
-                        {/* Desktop Nav */}
-                        <div className="desktop-nav" style={{ display: 'none' }}>
-                            <div className="glass" style={{ borderRadius: '9999px', padding: '6px', display: 'flex' }}>
-                                {navItems.map((item) => {
-                                    const Icon = item.icon;
-                                    const isActive = location.pathname === item.path;
-                                    return (
-                                        <Link
-                                            key={item.path}
-                                            to={item.path}
-                                            style={{
-                                                display: 'flex',
-                                                alignItems: 'center',
-                                                gap: '8px',
-                                                padding: '10px 20px',
-                                                borderRadius: '9999px',
-                                                textDecoration: 'none',
-                                                transition: 'all 0.2s',
-                                                background: isActive ? '#B6F35C' : 'transparent',
-                                                color: isActive ? '#0B0F0C' : '#9CA3AF',
-                                                fontWeight: isActive ? 600 : 400,
-                                                fontSize: '14px'
-                                            }}
-                                        >
-                                            <Icon style={{ width: '18px', height: '18px' }} />
-                                            <span>{item.label}</span>
-                                        </Link>
-                                    );
-                                })}
-                            </div>
-                        </div>
-
-                        {/* Wallet & Mobile Menu */}
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-                            <div className="glass desktop-nav" style={{
-                                display: 'none',
-                                alignItems: 'center',
-                                gap: '8px',
-                                padding: '8px 16px',
-                                borderRadius: '9999px',
-                                fontSize: '12px',
-                                color: '#B6F35C'
-                            }}>
-                                <div style={{
-                                    width: '8px',
-                                    height: '8px',
-                                    borderRadius: '50%',
-                                    backgroundColor: '#B6F35C'
-                                }}></div>
-                                Live Testnet
-                            </div>
-
-                            {walletConnected ? (
-                                <div className="btn-neon" style={{ padding: '10px 20px', fontSize: '14px' }}>
-                                    <Wallet style={{ width: '18px', height: '18px' }} />
-                                    <span>{formatAddress(walletAddress)}</span>
-                                </div>
-                            ) : (
-                                <button onClick={connectWallet} className="btn-neon" style={{ padding: '10px 20px', fontSize: '14px' }}>
-                                    <Wallet style={{ width: '18px', height: '18px' }} />
-                                    <span>Connect</span>
-                                </button>
-                            )}
-
-                            <button
-                                className="glass mobile-menu"
-                                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                                style={{
-                                    padding: '10px',
-                                    borderRadius: '12px',
-                                    border: 'none',
-                                    cursor: 'pointer',
-                                    color: 'white',
-                                    display: 'flex'
-                                }}
-                            >
-                                {mobileMenuOpen ? <X style={{ width: '24px', height: '24px' }} /> : <Menu style={{ width: '24px', height: '24px' }} />}
-                            </button>
-                        </div>
+                    {/* Desktop Nav */}
+                    <div className="desktop-nav" style={{
+                        display: 'none',
+                        alignItems: 'center',
+                        gap: '32px'
+                    }}>
+                        {navItems.map((item) => {
+                            const isActive = location.pathname === item.path ||
+                                (item.path === '/explore' && location.pathname.startsWith('/campaign'));
+                            return (
+                                <Link
+                                    key={item.path}
+                                    to={item.path}
+                                    style={{
+                                        textDecoration: 'none',
+                                        color: isActive ? 'var(--text-primary)' : 'var(--text-muted)',
+                                        fontWeight: isActive ? 500 : 400,
+                                        fontSize: '14px',
+                                        transition: 'color 0.15s'
+                                    }}
+                                >
+                                    {item.label}
+                                </Link>
+                            );
+                        })}
                     </div>
 
-                    {/* Mobile Menu */}
-                    {mobileMenuOpen && (
-                        <div className="glass-card" style={{ marginTop: '12px', padding: '16px' }}>
-                            {navItems.map((item) => {
-                                const Icon = item.icon;
-                                const isActive = location.pathname === item.path;
-                                return (
-                                    <Link
-                                        key={item.path}
-                                        to={item.path}
-                                        onClick={() => setMobileMenuOpen(false)}
-                                        style={{
-                                            display: 'flex',
-                                            alignItems: 'center',
-                                            gap: '14px',
-                                            padding: '14px 16px',
-                                            borderRadius: '12px',
-                                            textDecoration: 'none',
-                                            color: isActive ? '#B6F35C' : '#9CA3AF',
-                                            background: isActive ? 'rgba(182,243,92,0.1)' : 'transparent',
-                                            marginBottom: '4px'
-                                        }}
-                                    >
-                                        <Icon style={{ width: '20px', height: '20px' }} />
-                                        <span style={{ fontSize: '16px' }}>{item.label}</span>
-                                    </Link>
-                                );
-                            })}
-                        </div>
-                    )}
+                    {/* Right side */}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                        {walletConnected ? (
+                            <div style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '8px',
+                                padding: '8px 12px',
+                                background: 'var(--bg-secondary)',
+                                borderRadius: 'var(--radius)',
+                                fontSize: '13px',
+                                color: 'var(--text-secondary)'
+                            }}>
+                                <Wallet style={{ width: '16px', height: '16px' }} />
+                                <span>{formatAddress(walletAddress)}</span>
+                            </div>
+                        ) : (
+                            <button
+                                onClick={connectWallet}
+                                className="btn btn-ghost"
+                                style={{ padding: '8px 12px', fontSize: '13px' }}
+                            >
+                                <Wallet style={{ width: '16px', height: '16px' }} />
+                                <span>Connect</span>
+                            </button>
+                        )}
+
+                        <Link to="/create" className="btn btn-primary desktop-nav" style={{ display: 'none', padding: '8px 16px', fontSize: '13px' }}>
+                            Launch a campaign
+                        </Link>
+
+                        <button
+                            className="mobile-menu"
+                            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                            style={{
+                                padding: '8px',
+                                background: 'transparent',
+                                border: '1px solid var(--border)',
+                                borderRadius: 'var(--radius)',
+                                cursor: 'pointer',
+                                color: 'var(--text-primary)',
+                                display: 'flex'
+                            }}
+                        >
+                            {mobileMenuOpen ? <X style={{ width: '20px', height: '20px' }} /> : <Menu style={{ width: '20px', height: '20px' }} />}
+                        </button>
+                    </div>
                 </div>
+
+                {/* Mobile Menu */}
+                {mobileMenuOpen && (
+                    <div style={{
+                        padding: '16px',
+                        borderTop: '1px solid var(--border)',
+                        background: 'var(--bg-primary)'
+                    }}>
+                        {navItems.map((item) => {
+                            const isActive = location.pathname === item.path;
+                            return (
+                                <Link
+                                    key={item.path}
+                                    to={item.path}
+                                    onClick={() => setMobileMenuOpen(false)}
+                                    style={{
+                                        display: 'block',
+                                        padding: '12px 16px',
+                                        borderRadius: 'var(--radius)',
+                                        textDecoration: 'none',
+                                        color: isActive ? 'var(--text-primary)' : 'var(--text-muted)',
+                                        background: isActive ? 'var(--bg-secondary)' : 'transparent',
+                                        marginBottom: '4px',
+                                        fontSize: '15px'
+                                    }}
+                                >
+                                    {item.label}
+                                </Link>
+                            );
+                        })}
+                        <Link
+                            to="/create"
+                            onClick={() => setMobileMenuOpen(false)}
+                            className="btn btn-primary"
+                            style={{ width: '100%', marginTop: '12px', justifyContent: 'center' }}
+                        >
+                            Launch a campaign
+                        </Link>
+                    </div>
+                )}
             </nav>
 
             {/* Main Content */}
-            <main style={{ paddingTop: '120px', paddingBottom: '80px', paddingLeft: '32px', paddingRight: '32px' }}>
-                <div style={{ maxWidth: '1400px', margin: '0 auto' }}>
+            <main style={{ padding: '32px 16px 80px' }}>
+                <div style={{ maxWidth: '1120px', margin: '0 auto' }}>
                     {children}
                 </div>
             </main>
+
+            {/* Footer */}
+            <footer style={{
+                borderTop: '1px solid var(--border)',
+                padding: '32px 16px',
+                backgroundColor: 'var(--bg-secondary)'
+            }}>
+                <div style={{
+                    maxWidth: '1120px',
+                    margin: '0 auto',
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    flexWrap: 'wrap',
+                    gap: '16px'
+                }}>
+                    <div style={{ color: 'var(--text-muted)', fontSize: '14px' }}>
+                        © 2026 DeFund. AI-verified Web3 crowdfunding.
+                    </div>
+                    <div style={{ display: 'flex', gap: '24px', fontSize: '14px' }}>
+                        <a href="https://github.com/Namanbansal9414/hackthon" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--text-muted)', textDecoration: 'none' }}>GitHub</a>
+                        <a href="https://testnet.monadexplorer.com/address/0x11C88CdD5DcF83913cEe5d4a933d633a415E2437" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--text-muted)', textDecoration: 'none' }}>Contract</a>
+                    </div>
+                </div>
+            </footer>
 
             <style>{`
                 @media (min-width: 768px) {

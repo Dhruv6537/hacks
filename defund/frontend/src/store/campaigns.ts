@@ -31,65 +31,8 @@ export interface Campaign {
     }[];
 }
 
-// Initial demo campaigns (IDs shifted to avoid collision with real blockchain IDs starting at 0)
-const initialCampaigns: Campaign[] = [
-    {
-        id: 1000,
-        title: 'DeFi Analytics Platform (Demo)',
-        description: 'Real-time analytics dashboard for DeFi protocols with comprehensive metrics',
-        creator: '0x1234...5678',
-        fundingGoal: '10 MON',
-        raisedAmount: '7.5 MON',
-        progress: 75,
-        backers: 12,
-        state: 'ACTIVE',
-        currentMilestone: 1,
-        totalMilestones: 3,
-        milestones: [
-            { description: 'Complete smart contract development', allocation: 30, state: 'PASSED' },
-            { description: 'Launch MVP frontend dashboard', allocation: 40, state: 'SUBMITTED' },
-            { description: 'Complete full platform', allocation: 30, state: 'PENDING' },
-        ],
-    },
-    {
-        id: 1001,
-        title: 'NFT Marketplace V2 (Demo)',
-        description: 'Gas-efficient NFT marketplace with AI-powered recommendations',
-        creator: '0xabcd...efgh',
-        fundingGoal: '15 MON',
-        raisedAmount: '15 MON',
-        progress: 100,
-        backers: 24,
-        state: 'VERIFYING',
-        currentMilestone: 2,
-        totalMilestones: 3,
-        milestones: [
-            { description: 'Smart contract development', allocation: 40, state: 'PASSED' },
-            { description: 'Frontend development', allocation: 35, state: 'SUBMITTED' },
-            { description: 'Launch and marketing', allocation: 25, state: 'PENDING' },
-        ],
-    },
-    {
-        id: 1002,
-        title: 'DAO Governance Tools (Demo)',
-        description: 'Modular governance toolkit for DAOs with on-chain voting',
-        creator: '0x9876...4321',
-        fundingGoal: '8 MON',
-        raisedAmount: '3.2 MON',
-        progress: 40,
-        backers: 8,
-        state: 'ACTIVE',
-        currentMilestone: 0,
-        totalMilestones: 2,
-        milestones: [
-            { description: 'Design and architecture', allocation: 50, state: 'PENDING' },
-            { description: 'Implementation', allocation: 50, state: 'PENDING' },
-        ],
-    },
-];
-
-// In-memory store
-let campaigns: Campaign[] = [...initialCampaigns];
+// Start with empty campaigns - real data comes from blockchain
+let campaigns: Campaign[] = [];
 
 // IDs for offline campaigns (if any)
 let nextOfflineId = 2000;
@@ -114,11 +57,47 @@ const getMilestoneStateString = (state: number): 'PENDING' | 'SUBMITTED' | 'PASS
     }
 };
 
+// Track removed campaigns in localStorage
+const REMOVED_KEY = 'defund_removed_campaigns';
+const getRemovedIds = (): Set<number> => {
+    try {
+        const stored = localStorage.getItem(REMOVED_KEY);
+        return stored ? new Set(JSON.parse(stored)) : new Set();
+    } catch {
+        return new Set();
+    }
+};
+let removedCampaignIds: Set<number> = getRemovedIds();
+
+const saveRemovedIds = () => {
+    localStorage.setItem(REMOVED_KEY, JSON.stringify([...removedCampaignIds]));
+};
+
 // Store functions
 export const campaignStore = {
-    getAll: (): Campaign[] => campaigns,
+    getAll: (): Campaign[] => campaigns.filter(c => !removedCampaignIds.has(c.id)),
 
-    getById: (id: number): Campaign | undefined => campaigns.find(c => c.id === id),
+    getById: (id: number): Campaign | undefined => {
+        if (removedCampaignIds.has(id)) return undefined;
+        return campaigns.find(c => c.id === id);
+    },
+
+    // Remove a campaign from view (persisted in localStorage)
+    remove: (id: number): void => {
+        removedCampaignIds.add(id);
+        saveRemovedIds();
+        campaignStore.notify();
+    },
+
+    // Restore a removed campaign
+    restore: (id: number): void => {
+        removedCampaignIds.delete(id);
+        saveRemovedIds();
+        campaignStore.notify();
+    },
+
+    // Get list of removed IDs (for admin purposes)
+    getRemovedIds: (): number[] => [...removedCampaignIds],
 
     add: (campaign: Omit<Campaign, 'id' | 'raisedAmount' | 'progress' | 'backers' | 'state' | 'currentMilestone'> & { id?: number }): Campaign => {
         // Prevent adding duplicate ID if it already exists (e.g. from fetch)
