@@ -1,15 +1,16 @@
 FROM node:18-alpine
 
+# Set working directory to the backend folder
 WORKDIR /app
 
-# Copy package files
-COPY package*.json ./
+# Copy backend package files
+COPY defund/backend/package*.json ./
 
 # Install dependencies
 RUN npm install
 
-# Copy source code
-COPY . .
+# Copy backend source
+COPY defund/backend/ ./
 
 # Build TypeScript
 RUN npm run build
@@ -17,5 +18,5 @@ RUN npm run build
 # Expose port
 EXPOSE 3001
 
-# Start the server
+# Start server
 CMD ["npm", "start"]
