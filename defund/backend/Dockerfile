@@ -1,4 +1,4 @@
-FROM node:18-alpine
+FROM node:18
 
 # Set working directory
 WORKDIR /app
@@ -6,14 +6,17 @@ WORKDIR /app
 # Copy backend package files
 COPY defund/backend/package*.json ./
 
-# Install dependencies (including dev for tsc)
-RUN npm install
+# Install all dependencies
+RUN npm ci
 
 # Copy backend source
 COPY defund/backend/ ./
 
-# Build TypeScript using npx to avoid permission issues
-RUN npx tsc
+# Make node_modules binaries executable
+RUN chmod -R +x node_modules/.bin
+
+# Build TypeScript
+RUN ./node_modules/.bin/tsc
 
 # Expose port
 EXPOSE 3001
