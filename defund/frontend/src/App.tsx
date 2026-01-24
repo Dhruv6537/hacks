@@ -5,6 +5,7 @@ import Campaigns from './pages/Campaigns';
 import CampaignDetail from './pages/CampaignDetail';
 import CreateCampaign from './pages/CreateCampaign';
 import Verification from './pages/Verification';
+import Refunds from './pages/Refunds';
 import './index.css';
 
 function App() {
@@ -17,6 +18,7 @@ function App() {
           <Route path="/campaigns/:id" element={<CampaignDetail />} />
           <Route path="/create" element={<CreateCampaign />} />
           <Route path="/verification" element={<Verification />} />
+          <Route path="/refunds" element={<Refunds />} />
         </Routes>
       </Layout>
     </Router>

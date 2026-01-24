@@ -117,7 +117,7 @@ export default function CampaignDetail() {
             // Send transaction
             const tx = await contract.contribute(campaignId, {
                 value: amountInWei,
-                gasLimit: 100000 // Tight limit to keep fees low (~0.001-0.005 MON)
+                gasLimit: 150000 // Reasonable limit for contribution
             });
 
             console.log('Transaction sent:', tx.hash);
@@ -129,19 +129,27 @@ export default function CampaignDetail() {
             // Update local store to reflect contribution immediately
             campaignStore.contribute(campaignId, parseFloat(contributeAmount));
 
+            // Refresh from blockchain
+            await campaignStore.fetchCampaigns();
+
             alert(`✅ Contribution successful! Added ${contributeAmount} MON to campaign.`);
 
         } catch (error: any) {
             console.error('Contribution failed:', error);
-            const errorMessage = error.message || 'Unknown error';
+            let errorMessage = error.message || 'Unknown error';
 
+            // Parse common contract errors
             if (errorMessage.includes('rejected')) {
-                alert('Transaction rejected by user');
+                errorMessage = 'Transaction rejected by user';
             } else if (errorMessage.includes('Campaign not active')) {
-                alert('Campaign is not active on-chain.');
-            } else {
-                alert(`Contribution failed: ${errorMessage}`);
+                errorMessage = 'This campaign is no longer accepting contributions.';
+            } else if (errorMessage.includes('execution reverted')) {
+                errorMessage = 'Transaction failed. The campaign may be closed or failed.';
+            } else if (errorMessage.includes('insufficient funds')) {
+                errorMessage = 'Insufficient MON for this transaction.';
             }
+
+            alert(`❌ Contribution failed: ${errorMessage}`);
         } finally {
             setIsContributing(false);
         }

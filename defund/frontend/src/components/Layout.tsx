@@ -8,7 +8,8 @@ import {
     Wallet,
     Menu,
     X,
-    Zap
+    Zap,
+    RefreshCw
 } from 'lucide-react';
 
 interface LayoutProps {
@@ -32,6 +33,7 @@ export default function Layout({ children }: LayoutProps) {
         { path: '/campaigns', label: 'Campaigns', icon: FolderOpen },
         { path: '/create', label: 'Create', icon: PlusCircle },
         { path: '/verification', label: 'Verification', icon: Shield },
+        { path: '/refunds', label: 'Refunds', icon: RefreshCw },
     ];
 
     const connectWallet = async () => {
