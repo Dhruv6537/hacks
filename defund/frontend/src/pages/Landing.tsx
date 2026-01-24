@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { Shield, Lock, CheckCircle, Users, ArrowRight, Zap, Eye, Vote } from 'lucide-react';
+import { Shield, Lock, CheckCircle, ArrowRight, Zap, Eye, Vote } from 'lucide-react';
 
 export default function Landing() {
     return (

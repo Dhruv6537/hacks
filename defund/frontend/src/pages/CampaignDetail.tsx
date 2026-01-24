@@ -129,7 +129,7 @@ export default function CampaignDetail() {
         }
     };
 
-    const handleSubmitProof = async (milestoneIndex: number) => {
+    const handleSubmitProof = async (_milestoneIndex: number) => {
         if (!window.ethereum) return alert('Connect Wallet');
 
         const proofUrl = prompt("Enter Proof URL (GitHub, Video, etc):", "https://github.com/defund/milestone-proof");

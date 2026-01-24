@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { ethers } from 'ethers';
-import { ArrowLeft, AlertTriangle, DollarSign, CheckCircle, Wallet } from 'lucide-react';
+import { ArrowLeft, DollarSign, CheckCircle, Wallet } from 'lucide-react';
 import { campaignStore, type Campaign } from '../store/campaigns';
 
 // Contract address deployed on Monad testnet
