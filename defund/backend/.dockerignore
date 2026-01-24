@@ -1,0 +1,6 @@
+# Backend build and runtime
+node_modules/
+dist/
+*.log
+.env
+database.sqlite
