@@ -138,13 +138,21 @@ export default function CreateCampaign() {
     return (
         <div style={{ maxWidth: '700px', margin: '0 auto' }}>
             {/* Header */}
-            <section style={{ marginBottom: '32px' }}>
-                <h1 style={{ fontSize: '2rem', fontWeight: 700, marginBottom: '8px' }}>Launch a campaign</h1>
-                <p style={{ color: 'var(--text-muted)' }}>Create a crowdfunding campaign with AI-verified milestones</p>
+            <section className="animate-fade-in-up" style={{ marginBottom: '36px' }}>
+                <h1 style={{ fontSize: '2rem', fontWeight: 800, marginBottom: '8px', letterSpacing: '-0.03em' }}>Launch a campaign</h1>
+                <p style={{ color: 'var(--text-muted)', fontSize: '1.05rem' }}>Create a crowdfunding campaign with AI-verified milestones</p>
             </section>
 
             {/* Stepper */}
-            <div style={{ display: 'flex', marginBottom: '32px', background: 'var(--bg-secondary)', borderRadius: 'var(--radius-lg)', padding: '4px' }}>
+            <div className="animate-fade-in-up" style={{
+                display: 'flex',
+                marginBottom: '36px',
+                background: 'var(--bg-secondary)',
+                borderRadius: 'var(--radius-lg)',
+                padding: '4px',
+                border: '1px solid var(--border)',
+                animationDelay: '60ms'
+            }}>
                 {[1, 2, 3].map(s => (
                     <button
                         key={s}
@@ -158,15 +166,24 @@ export default function CreateCampaign() {
                             boxShadow: step === s ? 'var(--shadow-sm)' : 'none',
                             cursor: s < step ? 'pointer' : 'default',
                             color: step >= s ? 'var(--text-primary)' : 'var(--text-muted)',
-                            fontWeight: step === s ? 600 : 400,
+                            fontWeight: step === s ? 700 : 500,
                             fontSize: '14px',
                             display: 'flex',
                             alignItems: 'center',
                             justifyContent: 'center',
-                            gap: '6px'
+                            gap: '6px',
+                            transition: 'all 0.2s'
                         }}
                     >
-                        {s < step ? <CheckCircle style={{ width: '16px', height: '16px', color: 'var(--success)' }} /> : null}
+                        {s < step ? <CheckCircle style={{ width: '16px', height: '16px', color: 'var(--success)' }} /> : (
+                            <span style={{
+                                width: '20px', height: '20px', borderRadius: '50%',
+                                background: step === s ? 'var(--gradient-accent)' : 'var(--bg-tertiary)',
+                                color: step === s ? 'white' : 'var(--text-muted)',
+                                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                fontSize: '11px', fontWeight: 700
+                            }}>{s}</span>
+                        )}
                         {s === 1 ? 'Basics' : s === 2 ? 'Milestones' : 'Review'}
                     </button>
                 ))}
@@ -174,11 +191,12 @@ export default function CreateCampaign() {
 
             {/* Step 1: Basics */}
             {step === 1 && (
-                <div className="card">
-                    <h2 style={{ fontWeight: 600, marginBottom: '24px' }}>Campaign Details</h2>
+                <div className="card animate-fade-in" style={{ overflow: 'hidden', position: 'relative' }}>
+                    <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '3px', background: 'var(--gradient-accent)' }} />
+                    <h2 style={{ fontWeight: 700, marginBottom: '28px', paddingTop: '4px' }}>Campaign Details</h2>
 
-                    <div style={{ marginBottom: '20px' }}>
-                        <label style={{ display: 'block', fontSize: '13px', color: 'var(--text-muted)', marginBottom: '8px' }}>
+                    <div style={{ marginBottom: '22px' }}>
+                        <label style={{ display: 'block', fontSize: '13px', color: 'var(--text-muted)', marginBottom: '8px', fontWeight: 600 }}>
                             Project Title *
                         </label>
                         <input
@@ -190,8 +208,8 @@ export default function CreateCampaign() {
                         />
                     </div>
 
-                    <div style={{ marginBottom: '20px' }}>
-                        <label style={{ display: 'block', fontSize: '13px', color: 'var(--text-muted)', marginBottom: '8px' }}>
+                    <div style={{ marginBottom: '28px' }}>
+                        <label style={{ display: 'block', fontSize: '13px', color: 'var(--text-muted)', marginBottom: '8px', fontWeight: 600 }}>
                             Description *
                         </label>
                         <textarea
@@ -199,7 +217,7 @@ export default function CreateCampaign() {
                             onChange={(e) => setDescription(e.target.value)}
                             className="input"
                             placeholder="Describe your project and what you'll build..."
-                            style={{ height: '120px', resize: 'none' }}
+                            style={{ height: '130px', resize: 'none' }}
                         />
                     </div>
 
@@ -216,11 +234,12 @@ export default function CreateCampaign() {
 
             {/* Step 2: Funding & Milestones */}
             {step === 2 && (
-                <div className="card">
-                    <h2 style={{ fontWeight: 600, marginBottom: '24px' }}>Funding & Milestones</h2>
+                <div className="card animate-fade-in" style={{ overflow: 'hidden', position: 'relative' }}>
+                    <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '3px', background: 'var(--gradient-accent)' }} />
+                    <h2 style={{ fontWeight: 700, marginBottom: '28px', paddingTop: '4px' }}>Funding & Milestones</h2>
 
-                    <div style={{ marginBottom: '24px' }}>
-                        <label style={{ display: 'block', fontSize: '13px', color: 'var(--text-muted)', marginBottom: '8px' }}>
+                    <div style={{ marginBottom: '28px' }}>
+                        <label style={{ display: 'block', fontSize: '13px', color: 'var(--text-muted)', marginBottom: '8px', fontWeight: 600 }}>
                             Funding Goal (MON) *
                         </label>
                         <input
@@ -234,19 +253,23 @@ export default function CreateCampaign() {
                         />
                     </div>
 
-                    <div style={{ marginBottom: '16px' }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
-                            <label style={{ fontSize: '13px', color: 'var(--text-muted)' }}>Milestones</label>
+                    <div style={{ marginBottom: '20px' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px' }}>
+                            <label style={{ fontSize: '13px', color: 'var(--text-muted)', fontWeight: 600 }}>Milestones</label>
                             <span style={{
                                 fontSize: '13px',
-                                color: totalAllocation === 100 ? 'var(--success)' : 'var(--danger)'
+                                fontWeight: 700,
+                                color: totalAllocation === 100 ? 'var(--success)' : 'var(--danger)',
+                                padding: '4px 10px',
+                                borderRadius: '9999px',
+                                background: totalAllocation === 100 ? 'var(--success-light)' : 'var(--danger-light)'
                             }}>
                                 {totalAllocation}% / 100%
                             </span>
                         </div>
 
                         {milestones.map((milestone, index) => (
-                            <div key={index} style={{ display: 'flex', gap: '12px', marginBottom: '12px' }}>
+                            <div key={index} style={{ display: 'flex', gap: '10px', marginBottom: '10px' }}>
                                 <input
                                     type="text"
                                     value={milestone.description}
@@ -263,21 +286,21 @@ export default function CreateCampaign() {
                                     placeholder="%"
                                     min="0"
                                     max="100"
-                                    style={{ width: '80px' }}
+                                    style={{ width: '80px', textAlign: 'center' }}
                                 />
                                 <button
                                     type="button"
                                     onClick={() => removeMilestone(index)}
                                     disabled={milestones.length <= 1}
                                     className="btn btn-ghost"
-                                    style={{ padding: '10px' }}
+                                    style={{ padding: '10px', opacity: milestones.length <= 1 ? 0.3 : 1 }}
                                 >
                                     <Trash2 style={{ width: '16px', height: '16px' }} />
                                 </button>
                             </div>
                         ))}
 
-                        <button type="button" onClick={addMilestone} className="btn btn-ghost" style={{ width: '100%' }}>
+                        <button type="button" onClick={addMilestone} className="btn btn-ghost" style={{ width: '100%', borderStyle: 'dashed' }}>
                             <Plus style={{ width: '16px', height: '16px' }} /> Add milestone
                         </button>
                     </div>
@@ -300,39 +323,48 @@ export default function CreateCampaign() {
 
             {/* Step 3: Review */}
             {step === 3 && (
-                <div className="card">
-                    <h2 style={{ fontWeight: 600, marginBottom: '24px' }}>Review & Publish</h2>
+                <div className="card animate-fade-in" style={{ overflow: 'hidden', position: 'relative' }}>
+                    <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '3px', background: 'var(--gradient-accent)' }} />
+                    <h2 style={{ fontWeight: 700, marginBottom: '28px', paddingTop: '4px' }}>Review & Publish</h2>
 
                     <div className="card-flat" style={{ marginBottom: '24px' }}>
-                        <h3 style={{ fontWeight: 600, marginBottom: '8px' }}>{title}</h3>
-                        <p style={{ fontSize: '14px', color: 'var(--text-muted)', marginBottom: '16px' }}>{description}</p>
+                        <h3 style={{ fontWeight: 700, marginBottom: '8px' }}>{title}</h3>
+                        <p style={{ fontSize: '14px', color: 'var(--text-muted)', marginBottom: '18px', lineHeight: 1.6 }}>{description}</p>
 
-                        <div style={{ display: 'flex', gap: '24px', fontSize: '14px', marginBottom: '16px' }}>
+                        <div style={{ display: 'flex', gap: '24px', fontSize: '14px', marginBottom: '18px' }}>
                             <div>
                                 <span style={{ color: 'var(--text-muted)' }}>Goal:</span>{' '}
-                                <strong>{fundingGoal} MON</strong>
+                                <strong style={{ fontWeight: 700 }}>{fundingGoal} MON</strong>
                             </div>
                             <div>
                                 <span style={{ color: 'var(--text-muted)' }}>Milestones:</span>{' '}
-                                <strong>{milestones.length}</strong>
+                                <strong style={{ fontWeight: 700 }}>{milestones.length}</strong>
                             </div>
                         </div>
 
                         <div style={{ borderTop: '1px solid var(--border)', paddingTop: '16px' }}>
                             {milestones.map((m, i) => (
-                                <div key={i} style={{ display: 'flex', justifyContent: 'space-between', fontSize: '14px', marginBottom: '8px' }}>
-                                    <span>{m.description || `Milestone ${i + 1}`}</span>
-                                    <span style={{ color: 'var(--text-muted)' }}>{m.allocation}%</span>
+                                <div key={i} style={{ display: 'flex', justifyContent: 'space-between', fontSize: '14px', marginBottom: '10px', alignItems: 'center' }}>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                        <span style={{
+                                            width: '24px', height: '24px', borderRadius: '50%',
+                                            background: 'var(--accent-light)', color: 'var(--accent)',
+                                            display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                            fontSize: '11px', fontWeight: 700, flexShrink: 0
+                                        }}>{i + 1}</span>
+                                        <span>{m.description || `Milestone ${i + 1}`}</span>
+                                    </div>
+                                    <span className="badge badge-accent">{m.allocation}%</span>
                                 </div>
                             ))}
                         </div>
                     </div>
 
-                    <div className="card-flat" style={{ marginBottom: '24px', padding: '16px' }}>
-                        <p style={{ fontSize: '13px', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
-                            ✓ Funds will be locked in a smart contract<br />
-                            ✓ AI verifies each milestone before funds are released<br />
-                            ✓ Failed milestones trigger automatic refunds
+                    <div className="card-flat" style={{ marginBottom: '28px', padding: '18px' }}>
+                        <p style={{ fontSize: '14px', color: 'var(--text-secondary)', lineHeight: 1.8 }}>
+                            <span style={{ color: 'var(--success)', marginRight: '6px' }}>✓</span> Funds will be locked in a smart contract<br />
+                            <span style={{ color: 'var(--success)', marginRight: '6px' }}>✓</span> AI verifies each milestone before funds are released<br />
+                            <span style={{ color: 'var(--success)', marginRight: '6px' }}>✓</span> Failed milestones trigger automatic refunds
                         </p>
                     </div>
 
@@ -351,8 +383,8 @@ export default function CreateCampaign() {
                     </div>
 
                     {txHash && (
-                        <div style={{ marginTop: '16px', padding: '12px', background: 'var(--success-light)', borderRadius: 'var(--radius)', fontSize: '13px' }}>
-                            <a href={`https://testnet.monadexplorer.com/tx/${txHash}`} target="_blank" rel="noopener" style={{ color: '#166534' }}>
+                        <div style={{ marginTop: '18px', padding: '14px', background: 'var(--success-light)', borderRadius: 'var(--radius)', fontSize: '13px', border: '1px solid rgba(16,185,129,0.15)' }}>
+                            <a href={`https://testnet.monadexplorer.com/tx/${txHash}`} target="_blank" rel="noopener" style={{ color: '#059669', fontWeight: 600 }}>
                                 View transaction on explorer →
                             </a>
                         </div>

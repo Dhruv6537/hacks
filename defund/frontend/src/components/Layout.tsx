@@ -1,6 +1,6 @@
 import { type ReactNode, useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Wallet, Menu, X } from 'lucide-react';
+import { Wallet, Menu, X, Sun, Moon } from 'lucide-react';
 
 interface LayoutProps {
     children: ReactNode;
@@ -17,12 +17,30 @@ export default function Layout({ children }: LayoutProps) {
     const [walletConnected, setWalletConnected] = useState(false);
     const [walletAddress, setWalletAddress] = useState('');
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+    const [theme, setTheme] = useState<'light' | 'dark'>(() => {
+        if (typeof window !== 'undefined') {
+            const stored = localStorage.getItem('defund-theme');
+            if (stored === 'dark' || stored === 'light') return stored;
+            return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+        }
+        return 'light';
+    });
 
     const navItems = [
         { path: '/explore', label: 'Explore' },
         { path: '/dashboard', label: 'Dashboard' },
         { path: '/verification', label: 'How it works' },
     ];
+
+    // Apply theme to document
+    useEffect(() => {
+        document.documentElement.setAttribute('data-theme', theme);
+        localStorage.setItem('defund-theme', theme);
+    }, [theme]);
+
+    const toggleTheme = () => {
+        setTheme(prev => prev === 'light' ? 'dark' : 'light');
+    };
 
     const connectWallet = async () => {
         if (typeof window.ethereum !== 'undefined') {
@@ -78,19 +96,17 @@ export default function Layout({ children }: LayoutProps) {
     };
 
     return (
-        <div style={{ minHeight: '100vh', backgroundColor: 'var(--bg-primary)' }}>
+        <div style={{ minHeight: '100vh', backgroundColor: 'var(--bg-primary)', transition: 'background-color 0.35s' }}>
             {/* Navigation */}
-            <nav style={{
+            <nav className="navbar-glass" style={{
                 position: 'sticky',
                 top: 0,
                 zIndex: 50,
-                backgroundColor: 'var(--bg-primary)',
-                borderBottom: '1px solid var(--border)'
             }}>
                 <div style={{
-                    maxWidth: '1120px',
+                    maxWidth: '1160px',
                     margin: '0 auto',
-                    padding: '0 16px',
+                    padding: '0 20px',
                     height: '64px',
                     display: 'flex',
                     alignItems: 'center',
@@ -100,16 +116,27 @@ export default function Layout({ children }: LayoutProps) {
                     <Link to="/" style={{
                         display: 'flex',
                         alignItems: 'center',
-                        gap: '8px',
+                        gap: '10px',
                         textDecoration: 'none',
                         color: 'var(--text-primary)',
-                        fontWeight: 700,
-                        fontSize: '20px'
+                        fontWeight: 800,
+                        fontSize: '20px',
+                        letterSpacing: '-0.02em'
                     }}>
-                        <svg width="28" height="28" viewBox="0 0 32 32" fill="none">
-                            <rect width="32" height="32" rx="8" fill="#2563EB" />
-                            <path d="M10 16L14 20L22 12" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
-                        </svg>
+                        <div style={{
+                            width: '32px',
+                            height: '32px',
+                            borderRadius: '10px',
+                            background: 'var(--gradient-accent)',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            boxShadow: '0 2px 8px var(--accent-glow)'
+                        }}>
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                                <path d="M8 14L12 18L20 10" />
+                            </svg>
+                        </div>
                         DeFund
                     </Link>
 
@@ -117,7 +144,7 @@ export default function Layout({ children }: LayoutProps) {
                     <div className="desktop-nav" style={{
                         display: 'none',
                         alignItems: 'center',
-                        gap: '32px'
+                        gap: '8px'
                     }}>
                         {navItems.map((item) => {
                             const isActive = location.pathname === item.path ||
@@ -128,10 +155,13 @@ export default function Layout({ children }: LayoutProps) {
                                     to={item.path}
                                     style={{
                                         textDecoration: 'none',
-                                        color: isActive ? 'var(--text-primary)' : 'var(--text-muted)',
-                                        fontWeight: isActive ? 500 : 400,
+                                        color: isActive ? 'var(--accent)' : 'var(--text-muted)',
+                                        fontWeight: isActive ? 600 : 500,
                                         fontSize: '14px',
-                                        transition: 'color 0.15s'
+                                        padding: '8px 16px',
+                                        borderRadius: 'var(--radius)',
+                                        background: isActive ? 'var(--accent-light)' : 'transparent',
+                                        transition: 'all 0.2s',
                                     }}
                                 >
                                     {item.label}
@@ -141,34 +171,55 @@ export default function Layout({ children }: LayoutProps) {
                     </div>
 
                     {/* Right side */}
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        {/* Theme Toggle */}
+                        <button
+                            onClick={toggleTheme}
+                            className="theme-toggle"
+                            aria-label="Toggle theme"
+                        >
+                            {theme === 'light' ? (
+                                <Moon style={{ width: '16px', height: '16px' }} />
+                            ) : (
+                                <Sun style={{ width: '16px', height: '16px' }} />
+                            )}
+                        </button>
+
                         {walletConnected ? (
                             <div style={{
                                 display: 'flex',
                                 alignItems: 'center',
                                 gap: '8px',
-                                padding: '8px 12px',
-                                background: 'var(--bg-secondary)',
+                                padding: '8px 14px',
+                                background: 'var(--accent-light)',
                                 borderRadius: 'var(--radius)',
                                 fontSize: '13px',
-                                color: 'var(--text-secondary)'
+                                color: 'var(--accent)',
+                                fontWeight: 600,
+                                border: '1px solid transparent'
                             }}>
-                                <Wallet style={{ width: '16px', height: '16px' }} />
+                                <div style={{
+                                    width: '8px',
+                                    height: '8px',
+                                    borderRadius: '50%',
+                                    background: 'var(--success)',
+                                    boxShadow: '0 0 8px var(--success-glow)'
+                                }} />
                                 <span>{formatAddress(walletAddress)}</span>
                             </div>
                         ) : (
                             <button
                                 onClick={connectWallet}
                                 className="btn btn-ghost"
-                                style={{ padding: '8px 12px', fontSize: '13px' }}
+                                style={{ padding: '8px 14px', fontSize: '13px' }}
                             >
                                 <Wallet style={{ width: '16px', height: '16px' }} />
                                 <span>Connect</span>
                             </button>
                         )}
 
-                        <Link to="/create" className="btn btn-primary desktop-nav" style={{ display: 'none', padding: '8px 16px', fontSize: '13px' }}>
-                            Launch a campaign
+                        <Link to="/create" className="btn btn-primary desktop-nav" style={{ display: 'none', padding: '8px 18px', fontSize: '13px' }}>
+                            Launch campaign
                         </Link>
 
                         <button
@@ -192,9 +243,10 @@ export default function Layout({ children }: LayoutProps) {
                 {/* Mobile Menu */}
                 {mobileMenuOpen && (
                     <div style={{
-                        padding: '16px',
+                        padding: '16px 20px',
                         borderTop: '1px solid var(--border)',
-                        background: 'var(--bg-primary)'
+                        background: 'var(--bg-primary)',
+                        animation: 'fadeIn 0.2s ease'
                     }}>
                         {navItems.map((item) => {
                             const isActive = location.pathname === item.path;
@@ -208,10 +260,11 @@ export default function Layout({ children }: LayoutProps) {
                                         padding: '12px 16px',
                                         borderRadius: 'var(--radius)',
                                         textDecoration: 'none',
-                                        color: isActive ? 'var(--text-primary)' : 'var(--text-muted)',
-                                        background: isActive ? 'var(--bg-secondary)' : 'transparent',
+                                        color: isActive ? 'var(--accent)' : 'var(--text-muted)',
+                                        background: isActive ? 'var(--accent-light)' : 'transparent',
                                         marginBottom: '4px',
-                                        fontSize: '15px'
+                                        fontSize: '15px',
+                                        fontWeight: isActive ? 600 : 500,
                                     }}
                                 >
                                     {item.label}
@@ -224,15 +277,15 @@ export default function Layout({ children }: LayoutProps) {
                             className="btn btn-primary"
                             style={{ width: '100%', marginTop: '12px', justifyContent: 'center' }}
                         >
-                            Launch a campaign
+                            Launch campaign
                         </Link>
                     </div>
                 )}
             </nav>
 
             {/* Main Content */}
-            <main style={{ padding: '32px 16px 80px' }}>
-                <div style={{ maxWidth: '1120px', margin: '0 auto' }}>
+            <main style={{ padding: '32px 20px 80px' }}>
+                <div style={{ maxWidth: '1160px', margin: '0 auto' }}>
                     {children}
                 </div>
             </main>
@@ -240,11 +293,12 @@ export default function Layout({ children }: LayoutProps) {
             {/* Footer */}
             <footer style={{
                 borderTop: '1px solid var(--border)',
-                padding: '32px 16px',
-                backgroundColor: 'var(--bg-secondary)'
+                padding: '40px 20px',
+                backgroundColor: 'var(--bg-secondary)',
+                transition: 'background-color 0.35s'
             }}>
                 <div style={{
-                    maxWidth: '1120px',
+                    maxWidth: '1160px',
                     margin: '0 auto',
                     display: 'flex',
                     justifyContent: 'space-between',
@@ -252,12 +306,27 @@ export default function Layout({ children }: LayoutProps) {
                     flexWrap: 'wrap',
                     gap: '16px'
                 }}>
-                    <div style={{ color: 'var(--text-muted)', fontSize: '14px' }}>
-                        © 2026 DeFund. AI-verified Web3 crowdfunding.
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                        <div style={{
+                            width: '24px',
+                            height: '24px',
+                            borderRadius: '7px',
+                            background: 'var(--gradient-accent)',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                        }}>
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                                <path d="M8 14L12 18L20 10" />
+                            </svg>
+                        </div>
+                        <span style={{ color: 'var(--text-muted)', fontSize: '14px' }}>
+                            © 2026 DeFund · AI-verified crowdfunding
+                        </span>
                     </div>
                     <div style={{ display: 'flex', gap: '24px', fontSize: '14px' }}>
-                        <a href="https://github.com/Namanbansal9414/hackthon" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--text-muted)', textDecoration: 'none' }}>GitHub</a>
-                        <a href="https://testnet.monadexplorer.com/address/0x11C88CdD5DcF83913cEe5d4a933d633a415E2437" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--text-muted)', textDecoration: 'none' }}>Contract</a>
+                        <a href="https://github.com/Namanbansal9414/hackthon" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--text-muted)', textDecoration: 'none', transition: 'color 0.2s' }}>GitHub</a>
+                        <a href="https://testnet.monadexplorer.com/address/0x11C88CdD5DcF83913cEe5d4a933d633a415E2437" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--text-muted)', textDecoration: 'none', transition: 'color 0.2s' }}>Contract</a>
                     </div>
                 </div>
             </footer>

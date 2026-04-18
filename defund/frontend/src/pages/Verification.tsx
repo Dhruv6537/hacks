@@ -58,72 +58,102 @@ export default function Verification() {
     return (
         <div>
             {/* Header */}
-            <section style={{ marginBottom: '32px' }}>
-                <h1 style={{ fontSize: '2rem', fontWeight: 700, marginBottom: '8px' }}>How it works</h1>
-                <p style={{ color: 'var(--text-muted)' }}>Transparent AI verification for every milestone</p>
+            <section className="animate-fade-in-up" style={{ marginBottom: '36px' }}>
+                <h1 style={{ fontSize: '2rem', fontWeight: 800, marginBottom: '8px', letterSpacing: '-0.03em' }}>How it works</h1>
+                <p style={{ color: 'var(--text-muted)', fontSize: '1.05rem' }}>Transparent AI verification for every milestone</p>
             </section>
 
             {/* How it works */}
-            <section style={{ marginBottom: '48px' }}>
-                <div className="card" style={{ padding: '32px' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '20px' }}>
-                        <Brain style={{ width: '24px', height: '24px', color: 'var(--accent)' }} />
-                        <h2 style={{ fontSize: '1.25rem', fontWeight: 600 }}>AI Verification Engine</h2>
+            <section className="animate-fade-in-up" style={{ marginBottom: '48px', animationDelay: '60ms' }}>
+                <div className="card" style={{ padding: '36px', overflow: 'hidden', position: 'relative' }}>
+                    {/* Gradient accent */}
+                    <div style={{
+                        position: 'absolute', top: 0, left: 0, right: 0, height: '4px',
+                        background: 'var(--gradient-accent)',
+                        borderRadius: 'var(--radius-lg) var(--radius-lg) 0 0'
+                    }} />
+
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '14px', marginBottom: '22px' }}>
+                        <div style={{
+                            width: '48px', height: '48px', borderRadius: 'var(--radius-lg)',
+                            background: 'var(--accent-light)', display: 'flex', alignItems: 'center', justifyContent: 'center'
+                        }}>
+                            <Brain style={{ width: '26px', height: '26px', color: 'var(--accent)' }} />
+                        </div>
+                        <h2 style={{ fontSize: '1.35rem', fontWeight: 800, letterSpacing: '-0.02em' }}>AI Verification Engine</h2>
                     </div>
-                    <p style={{ color: 'var(--text-secondary)', marginBottom: '24px', lineHeight: 1.7 }}>
+                    <p style={{ color: 'var(--text-secondary)', marginBottom: '28px', lineHeight: 1.7, fontSize: '15px', maxWidth: '700px' }}>
                         When creators submit proof of milestone completion, our AI analyzes the evidence (GitHub repos, documents, demos)
                         and determines if the deliverables match the milestone requirements. Verified milestones unlock funds automatically.
                     </p>
-                    <div className="card-grid-3">
-                        <div className="card-flat" style={{ padding: '20px', textAlign: 'center' }}>
-                            <Eye style={{ width: '24px', height: '24px', color: 'var(--accent)', margin: '0 auto 12px' }} />
-                            <h4 style={{ fontWeight: 600, marginBottom: '4px' }}>Proof Analysis</h4>
-                            <p style={{ fontSize: '13px', color: 'var(--text-muted)' }}>Examines submitted URLs and evidence</p>
-                        </div>
-                        <div className="card-flat" style={{ padding: '20px', textAlign: 'center' }}>
-                            <Zap style={{ width: '24px', height: '24px', color: 'var(--warning)', margin: '0 auto 12px' }} />
-                            <h4 style={{ fontWeight: 600, marginBottom: '4px' }}>Instant Decision</h4>
-                            <p style={{ fontSize: '13px', color: 'var(--text-muted)' }}>Results in seconds, not days</p>
-                        </div>
-                        <div className="card-flat" style={{ padding: '20px', textAlign: 'center' }}>
-                            <Shield style={{ width: '24px', height: '24px', color: 'var(--success)', margin: '0 auto 12px' }} />
-                            <h4 style={{ fontWeight: 600, marginBottom: '4px' }}>On-chain Record</h4>
-                            <p style={{ fontSize: '13px', color: 'var(--text-muted)' }}>All decisions stored permanently</p>
-                        </div>
+                    <div className="card-grid-3 stagger">
+                        {[
+                            {
+                                icon: <Eye style={{ width: '26px', height: '26px', color: 'var(--accent)' }} />,
+                                bg: 'var(--accent-light)',
+                                title: 'Proof Analysis',
+                                desc: 'Examines submitted URLs and evidence'
+                            },
+                            {
+                                icon: <Zap style={{ width: '26px', height: '26px', color: 'var(--warning)' }} />,
+                                bg: 'var(--warning-light)',
+                                title: 'Instant Decision',
+                                desc: 'Results in seconds, not days'
+                            },
+                            {
+                                icon: <Shield style={{ width: '26px', height: '26px', color: 'var(--success)' }} />,
+                                bg: 'var(--success-light)',
+                                title: 'On-chain Record',
+                                desc: 'All decisions stored permanently'
+                            }
+                        ].map((item, i) => (
+                            <div key={i} className="feature-card" style={{ textAlign: 'center', padding: '28px 22px' }}>
+                                <div className="icon-box" style={{
+                                    margin: '0 auto 16px', background: item.bg,
+                                    width: '52px', height: '52px', borderRadius: '50%'
+                                }}>
+                                    {item.icon}
+                                </div>
+                                <h4 style={{ fontWeight: 700, marginBottom: '6px' }}>{item.title}</h4>
+                                <p style={{ fontSize: '13px', color: 'var(--text-muted)', lineHeight: 1.6 }}>{item.desc}</p>
+                            </div>
+                        ))}
                     </div>
                 </div>
             </section>
 
             {/* Stats */}
-            <section style={{ marginBottom: '48px' }}>
-                <div className="card-grid-4">
-                    <div className="card" style={{ textAlign: 'center' }}>
-                        <div style={{ fontSize: '2rem', fontWeight: 700, color: 'var(--accent)' }}>{totalVerifications}</div>
-                        <div style={{ fontSize: '13px', color: 'var(--text-muted)' }}>Total Verifications</div>
-                    </div>
-                    <div className="card" style={{ textAlign: 'center' }}>
-                        <div style={{ fontSize: '2rem', fontWeight: 700, color: 'var(--success)' }}>{passRate}%</div>
-                        <div style={{ fontSize: '13px', color: 'var(--text-muted)' }}>Pass Rate</div>
-                    </div>
-                    <div className="card" style={{ textAlign: 'center' }}>
-                        <div style={{ fontSize: '2rem', fontWeight: 700, color: 'var(--accent)' }}>{avgConfidence}%</div>
-                        <div style={{ fontSize: '13px', color: 'var(--text-muted)' }}>Avg Confidence</div>
-                    </div>
-                    <div className="card" style={{ textAlign: 'center' }}>
-                        <div style={{ fontSize: '2rem', fontWeight: 700, color: 'var(--text-primary)' }}>{campaigns.length}</div>
-                        <div style={{ fontSize: '13px', color: 'var(--text-muted)' }}>Campaigns</div>
-                    </div>
+            <section className="animate-fade-in-up" style={{ marginBottom: '48px', animationDelay: '120ms' }}>
+                <div className="card-grid-4 stagger">
+                    {[
+                        { value: totalVerifications, label: 'Total Verifications', color: 'var(--accent)' },
+                        { value: `${passRate}%`, label: 'Pass Rate', color: 'var(--success)' },
+                        { value: `${avgConfidence}%`, label: 'Avg Confidence', color: 'var(--accent)' },
+                        { value: campaigns.length, label: 'Campaigns', color: 'var(--text-primary)' },
+                    ].map((stat, i) => (
+                        <div key={i} className="card" style={{ textAlign: 'center', padding: '24px 18px' }}>
+                            <div style={{ fontSize: '2rem', fontWeight: 800, color: stat.color, letterSpacing: '-0.03em', marginBottom: '4px' }}>
+                                {stat.value}
+                            </div>
+                            <div style={{ fontSize: '13px', color: 'var(--text-muted)', fontWeight: 500 }}>{stat.label}</div>
+                        </div>
+                    ))}
                 </div>
             </section>
 
             {/* Recent Verifications */}
-            <section>
-                <h2 style={{ fontSize: '1.25rem', fontWeight: 600, marginBottom: '16px' }}>Recent Verifications</h2>
+            <section className="animate-fade-in-up" style={{ animationDelay: '180ms' }}>
+                <h2 style={{ fontSize: '1.3rem', fontWeight: 700, marginBottom: '20px', letterSpacing: '-0.01em' }}>Recent Verifications</h2>
 
                 {verifications.length === 0 ? (
-                    <div className="card-flat" style={{ textAlign: 'center', padding: '48px' }}>
-                        <Shield style={{ width: '40px', height: '40px', margin: '0 auto 16px', color: 'var(--text-muted)' }} />
-                        <p style={{ color: 'var(--text-muted)', marginBottom: '16px' }}>No verifications yet</p>
+                    <div className="card-flat" style={{ textAlign: 'center', padding: '64px 24px' }}>
+                        <div style={{
+                            width: '56px', height: '56px', borderRadius: '50%', background: 'var(--bg-tertiary)',
+                            display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 20px'
+                        }}>
+                            <Shield style={{ width: '28px', height: '28px', color: 'var(--text-muted)' }} />
+                        </div>
+                        <p style={{ color: 'var(--text-muted)', marginBottom: '20px' }}>No verifications yet</p>
                         <Link to="/explore" className="btn btn-ghost">Explore campaigns</Link>
                     </div>
                 ) : (
@@ -137,26 +167,33 @@ export default function Verification() {
                                     width: '100%',
                                     textAlign: 'left',
                                     cursor: 'pointer',
-                                    padding: '16px 20px',
-                                    border: selectedRecord === record ? '2px solid var(--accent)' : undefined
+                                    padding: '16px 22px',
+                                    border: selectedRecord === record ? '2px solid var(--accent)' : undefined,
+                                    boxShadow: selectedRecord === record ? 'var(--shadow-glow)' : undefined,
                                 }}
                             >
                                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                                        {record.passed ? (
-                                            <CheckCircle style={{ width: '20px', height: '20px', color: 'var(--success)' }} />
-                                        ) : (
-                                            <XCircle style={{ width: '20px', height: '20px', color: 'var(--danger)' }} />
-                                        )}
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+                                        <div style={{
+                                            width: '38px', height: '38px', borderRadius: '50%',
+                                            background: record.passed ? 'var(--success-light)' : 'var(--danger-light)',
+                                            display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0
+                                        }}>
+                                            {record.passed ? (
+                                                <CheckCircle style={{ width: '20px', height: '20px', color: 'var(--success)' }} />
+                                            ) : (
+                                                <XCircle style={{ width: '20px', height: '20px', color: 'var(--danger)' }} />
+                                            )}
+                                        </div>
                                         <div>
-                                            <div style={{ fontWeight: 500, marginBottom: '2px' }}>{record.campaignTitle}</div>
+                                            <div style={{ fontWeight: 600, marginBottom: '2px' }}>{record.campaignTitle}</div>
                                             <div style={{ fontSize: '13px', color: 'var(--text-muted)' }}>
                                                 Milestone {record.milestoneIndex + 1}: {record.milestoneDescription}
                                             </div>
                                         </div>
                                     </div>
                                     <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                                        <span style={{ fontSize: '13px', color: 'var(--text-muted)' }}>{record.confidence}%</span>
+                                        <span style={{ fontSize: '13px', color: 'var(--text-muted)', fontWeight: 500 }}>{record.confidence}%</span>
                                         <span className={`badge ${record.passed ? 'badge-success' : 'badge-fail'}`}>
                                             {record.passed ? 'PASS' : 'FAIL'}
                                         </span>
@@ -169,17 +206,32 @@ export default function Verification() {
 
                 {/* Detail Panel */}
                 {selectedRecord && (
-                    <div className="card" style={{ marginTop: '24px' }}>
-                        <h3 style={{ fontWeight: 600, marginBottom: '16px' }}>Verification Details</h3>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '16px', padding: '20px', background: 'var(--bg-secondary)', borderRadius: 'var(--radius-lg)', marginBottom: '16px' }}>
-                            {selectedRecord.passed ? (
-                                <CheckCircle style={{ width: '32px', height: '32px', color: 'var(--success)' }} />
-                            ) : (
-                                <XCircle style={{ width: '32px', height: '32px', color: 'var(--danger)' }} />
-                            )}
+                    <div className="card animate-fade-in" style={{ marginTop: '24px', overflow: 'hidden', position: 'relative' }}>
+                        {/* Gradient accent */}
+                        <div style={{
+                            position: 'absolute', top: 0, left: 0, right: 0, height: '3px',
+                            background: selectedRecord.passed ? 'linear-gradient(90deg, var(--success), #34D399)' : 'linear-gradient(90deg, var(--danger), #F87171)'
+                        }} />
+                        <h3 style={{ fontWeight: 700, marginBottom: '18px', paddingTop: '4px' }}>Verification Details</h3>
+                        <div style={{
+                            display: 'flex', alignItems: 'center', gap: '18px', padding: '22px',
+                            background: 'var(--bg-secondary)', borderRadius: 'var(--radius-lg)',
+                            marginBottom: '18px', border: '1px solid var(--border)'
+                        }}>
+                            <div style={{
+                                width: '52px', height: '52px', borderRadius: '50%',
+                                background: selectedRecord.passed ? 'var(--success-light)' : 'var(--danger-light)',
+                                display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0
+                            }}>
+                                {selectedRecord.passed ? (
+                                    <CheckCircle style={{ width: '28px', height: '28px', color: 'var(--success)' }} />
+                                ) : (
+                                    <XCircle style={{ width: '28px', height: '28px', color: 'var(--danger)' }} />
+                                )}
+                            </div>
                             <div>
-                                <div style={{ fontSize: '1.25rem', fontWeight: 700 }}>{selectedRecord.passed ? 'PASSED' : 'FAILED'}</div>
-                                <div style={{ fontSize: '13px', color: 'var(--text-muted)' }}>Confidence: {selectedRecord.confidence}%</div>
+                                <div style={{ fontSize: '1.35rem', fontWeight: 800 }}>{selectedRecord.passed ? 'PASSED' : 'FAILED'}</div>
+                                <div style={{ fontSize: '14px', color: 'var(--text-muted)' }}>Confidence: {selectedRecord.confidence}%</div>
                             </div>
                         </div>
                         <Link to={`/campaign/${selectedRecord.campaignId}`} className="btn btn-ghost">

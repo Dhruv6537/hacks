@@ -56,9 +56,11 @@ export default function CampaignDetail() {
     // Loading state
     if (isLoading && !campaign) {
         return (
-            <div style={{ textAlign: 'center', padding: '64px' }}>
+            <div style={{ textAlign: 'center', padding: '80px 24px' }}>
                 <div className="card-flat" style={{ display: 'inline-block', padding: '24px 48px' }}>
-                    Loading Campaign Data...
+                    <div className="animate-pulse-soft" style={{ fontSize: '15px', color: 'var(--text-muted)' }}>
+                        Loading campaign data...
+                    </div>
                 </div>
             </div>
         );
@@ -66,8 +68,15 @@ export default function CampaignDetail() {
 
     if (!campaign) {
         return (
-            <div style={{ textAlign: 'center', padding: '48px' }}>
-                <h1 style={{ fontSize: '24px', marginBottom: '16px' }}>Campaign Not Found</h1>
+            <div style={{ textAlign: 'center', padding: '80px 24px' }}>
+                <div style={{
+                    width: '56px', height: '56px', borderRadius: '50%', background: 'var(--bg-tertiary)',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 20px'
+                }}>
+                    <AlertCircle style={{ width: '28px', height: '28px', color: 'var(--text-muted)' }} />
+                </div>
+                <h1 style={{ fontSize: '1.5rem', fontWeight: 700, marginBottom: '12px' }}>Campaign Not Found</h1>
+                <p style={{ color: 'var(--text-muted)', marginBottom: '20px' }}>This campaign doesn't exist or has been removed.</p>
                 <Link to="/explore" className="btn btn-ghost">Back to Explore</Link>
             </div>
         );
@@ -195,8 +204,10 @@ export default function CampaignDetail() {
         return null;
     };
 
+    const tabs = ['overview', 'milestones', 'updates'];
+
     return (
-        <div>
+        <div className="animate-fade-in-up">
             {/* Back Button */}
             <Link to="/explore" style={{
                 display: 'inline-flex',
@@ -204,8 +215,10 @@ export default function CampaignDetail() {
                 gap: '6px',
                 color: 'var(--text-muted)',
                 textDecoration: 'none',
-                marginBottom: '24px',
-                fontSize: '14px'
+                marginBottom: '28px',
+                fontSize: '14px',
+                fontWeight: 500,
+                transition: 'color 0.2s'
             }}>
                 <ArrowLeft style={{ width: '16px', height: '16px' }} />
                 Back to Explore
@@ -216,36 +229,37 @@ export default function CampaignDetail() {
                 {/* Main Content */}
                 <div>
                     {/* Header */}
-                    <div style={{ marginBottom: '24px' }}>
-                        <div style={{ display: 'flex', gap: '8px', marginBottom: '12px', flexWrap: 'wrap' }}>
+                    <div style={{ marginBottom: '28px' }}>
+                        <div style={{ display: 'flex', gap: '8px', marginBottom: '14px', flexWrap: 'wrap' }}>
                             <span className="tag">{campaign.state === 'ACTIVE' ? 'Funding' : campaign.state}</span>
                             <span className="tag">Monad</span>
                         </div>
-                        <h1 style={{ fontSize: '1.75rem', fontWeight: 700, marginBottom: '12px' }}>{campaign.title}</h1>
-                        <p style={{ color: 'var(--text-muted)', lineHeight: 1.7 }}>{campaign.description}</p>
+                        <h1 style={{ fontSize: '1.85rem', fontWeight: 800, marginBottom: '14px', letterSpacing: '-0.03em' }}>{campaign.title}</h1>
+                        <p style={{ color: 'var(--text-muted)', lineHeight: 1.7, fontSize: '15px' }}>{campaign.description}</p>
                     </div>
 
                     {/* Tabs */}
                     <div style={{
                         display: 'flex',
-                        gap: '4px',
+                        gap: '2px',
                         borderBottom: '1px solid var(--border)',
-                        marginBottom: '24px'
+                        marginBottom: '28px'
                     }}>
-                        {['overview', 'milestones', 'updates'].map(tab => (
+                        {tabs.map(tab => (
                             <button
                                 key={tab}
                                 onClick={() => setActiveTab(tab)}
                                 style={{
-                                    padding: '12px 20px',
+                                    padding: '12px 22px',
                                     background: 'transparent',
                                     border: 'none',
                                     borderBottom: activeTab === tab ? '2px solid var(--accent)' : '2px solid transparent',
-                                    color: activeTab === tab ? 'var(--text-primary)' : 'var(--text-muted)',
-                                    fontWeight: activeTab === tab ? 500 : 400,
+                                    color: activeTab === tab ? 'var(--accent)' : 'var(--text-muted)',
+                                    fontWeight: activeTab === tab ? 600 : 500,
                                     cursor: 'pointer',
                                     fontSize: '14px',
-                                    textTransform: 'capitalize'
+                                    textTransform: 'capitalize',
+                                    transition: 'all 0.2s'
                                 }}
                             >
                                 {tab}
@@ -255,16 +269,16 @@ export default function CampaignDetail() {
 
                     {/* Tab Content */}
                     {activeTab === 'overview' && (
-                        <div>
-                            <div className="card" style={{ marginBottom: '16px' }}>
-                                <h3 style={{ fontSize: '1rem', fontWeight: 600, marginBottom: '12px' }}>About this project</h3>
-                                <p style={{ color: 'var(--text-secondary)', lineHeight: 1.7 }}>
+                        <div className="animate-fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                            <div className="card">
+                                <h3 style={{ fontSize: '1rem', fontWeight: 700, marginBottom: '12px' }}>About this project</h3>
+                                <p style={{ color: 'var(--text-secondary)', lineHeight: 1.7, fontSize: '15px' }}>
                                     {campaign.description}
                                 </p>
                             </div>
                             <div className="card">
-                                <h3 style={{ fontSize: '1rem', fontWeight: 600, marginBottom: '12px' }}>Why DeFund?</h3>
-                                <ul style={{ color: 'var(--text-secondary)', lineHeight: 1.8, paddingLeft: '20px' }}>
+                                <h3 style={{ fontSize: '1rem', fontWeight: 700, marginBottom: '12px' }}>Why DeFund?</h3>
+                                <ul style={{ color: 'var(--text-secondary)', lineHeight: 2, paddingLeft: '20px', fontSize: '15px' }}>
                                     <li>Funds locked in smart contracts until milestones pass</li>
                                     <li>AI verification ensures accountability</li>
                                     <li>Automatic refunds if milestones fail</li>
@@ -274,19 +288,36 @@ export default function CampaignDetail() {
                     )}
 
                     {activeTab === 'milestones' && (
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                        <div className="animate-fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                             {campaign.milestones.map((milestone, index) => {
                                 const status = getMilestoneStatus(milestone.state);
                                 const isCurrent = index === campaign.currentMilestone;
                                 return (
                                     <div key={index} className="card" style={{
-                                        border: isCurrent ? '2px solid var(--accent)' : undefined
+                                        border: isCurrent ? '2px solid var(--accent)' : undefined,
+                                        boxShadow: isCurrent ? 'var(--shadow-glow)' : undefined,
+                                        position: 'relative',
+                                        overflow: 'hidden'
                                     }}>
+                                        {isCurrent && (
+                                            <div style={{
+                                                position: 'absolute', top: 0, left: 0, right: 0, height: '3px',
+                                                background: 'var(--gradient-accent)'
+                                            }} />
+                                        )}
                                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '12px' }}>
-                                            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                                                {status.icon}
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+                                                <div style={{
+                                                    width: '38px', height: '38px', borderRadius: '50%',
+                                                    background: milestone.state === 'PASSED' ? 'var(--success-light)' :
+                                                        milestone.state === 'SUBMITTED' ? 'var(--warning-light)' :
+                                                            milestone.state === 'FAILED' ? 'var(--danger-light)' : 'var(--bg-tertiary)',
+                                                    display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0
+                                                }}>
+                                                    {status.icon}
+                                                </div>
                                                 <div>
-                                                    <h4 style={{ fontWeight: 600, marginBottom: '2px' }}>Milestone {index + 1}</h4>
+                                                    <h4 style={{ fontWeight: 700, marginBottom: '2px' }}>Milestone {index + 1}</h4>
                                                     <p style={{ fontSize: '14px', color: 'var(--text-muted)' }}>{milestone.description}</p>
                                                 </div>
                                             </div>
@@ -325,8 +356,13 @@ export default function CampaignDetail() {
                     )}
 
                     {activeTab === 'updates' && (
-                        <div className="card-flat" style={{ textAlign: 'center', padding: '48px' }}>
-                            <Clock style={{ width: '32px', height: '32px', margin: '0 auto 12px', color: 'var(--text-muted)' }} />
+                        <div className="animate-fade-in card-flat" style={{ textAlign: 'center', padding: '56px 24px' }}>
+                            <div style={{
+                                width: '48px', height: '48px', borderRadius: '50%', background: 'var(--bg-tertiary)',
+                                display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px'
+                            }}>
+                                <Clock style={{ width: '24px', height: '24px', color: 'var(--text-muted)' }} />
+                            </div>
                             <p style={{ color: 'var(--text-muted)' }}>No updates yet</p>
                         </div>
                     )}
@@ -334,32 +370,39 @@ export default function CampaignDetail() {
 
                 {/* Sidebar */}
                 <div>
-                    <div className="card" style={{ position: 'sticky', top: '80px' }}>
+                    <div className="card" style={{ position: 'sticky', top: '84px', overflow: 'hidden' }}>
+                        {/* Gradient top accent */}
+                        <div style={{
+                            position: 'absolute', top: 0, left: 0, right: 0, height: '4px',
+                            background: 'var(--gradient-accent)',
+                            borderRadius: 'var(--radius-lg) var(--radius-lg) 0 0'
+                        }} />
+
                         {/* Progress */}
-                        <div style={{ marginBottom: '20px' }}>
-                            <div className="progress-bar" style={{ height: '10px', marginBottom: '12px' }}>
+                        <div style={{ marginBottom: '24px', paddingTop: '4px' }}>
+                            <div className="progress-bar" style={{ height: '12px', marginBottom: '14px' }}>
                                 <div className="progress-fill" style={{ width: `${campaign.progress}%` }}></div>
                             </div>
                             <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '14px' }}>
-                                <span style={{ fontWeight: 600 }}>{campaign.raisedAmount}</span>
+                                <span style={{ fontWeight: 700 }}>{campaign.raisedAmount}</span>
                                 <span style={{ color: 'var(--text-muted)' }}>of {campaign.fundingGoal}</span>
                             </div>
-                            <div style={{ fontSize: '24px', fontWeight: 700, color: 'var(--accent)', marginTop: '4px' }}>
+                            <div className="text-gradient" style={{ fontSize: '1.75rem', fontWeight: 800, marginTop: '6px', letterSpacing: '-0.02em' }}>
                                 {campaign.progress}% funded
                             </div>
                         </div>
 
                         {/* AI Status */}
-                        <div style={{ marginBottom: '20px', padding: '16px', background: 'var(--bg-secondary)', borderRadius: 'var(--radius-lg)' }}>
-                            <div style={{ fontSize: '13px', color: 'var(--text-muted)', marginBottom: '8px' }}>AI verification status</div>
+                        <div style={{ marginBottom: '24px', padding: '18px', background: 'var(--bg-secondary)', borderRadius: 'var(--radius-lg)', border: '1px solid var(--border)' }}>
+                            <div style={{ fontSize: '13px', color: 'var(--text-muted)', marginBottom: '10px', fontWeight: 500 }}>AI verification status</div>
                             {getStatusBadge() || <span className="pill" style={{ background: 'var(--bg-tertiary)', color: 'var(--text-muted)' }}>Not started</span>}
-                            <div style={{ fontSize: '12px', color: 'var(--text-muted)', marginTop: '8px' }}>
+                            <div style={{ fontSize: '12px', color: 'var(--text-muted)', marginTop: '10px' }}>
                                 Milestone {campaign.currentMilestone + 1} of {campaign.totalMilestones}
                             </div>
                         </div>
 
                         {/* Stats */}
-                        <div style={{ display: 'flex', gap: '16px', marginBottom: '20px', fontSize: '14px' }}>
+                        <div style={{ display: 'flex', gap: '16px', marginBottom: '24px', fontSize: '14px' }}>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: 'var(--text-secondary)' }}>
                                 <Users style={{ width: '16px', height: '16px' }} />
                                 {campaign.backers} backers
@@ -369,8 +412,8 @@ export default function CampaignDetail() {
                         {/* Back Form */}
                         {campaign.state === 'ACTIVE' && (
                             <>
-                                <div style={{ marginBottom: '12px' }}>
-                                    <label style={{ fontSize: '13px', color: 'var(--text-muted)', display: 'block', marginBottom: '6px' }}>Amount (MON)</label>
+                                <div style={{ marginBottom: '14px' }}>
+                                    <label style={{ fontSize: '13px', color: 'var(--text-muted)', display: 'block', marginBottom: '8px', fontWeight: 500 }}>Amount (MON)</label>
                                     <input
                                         type="number"
                                         value={contributeAmount}
@@ -393,8 +436,8 @@ export default function CampaignDetail() {
                         )}
 
                         {campaign.state === 'FAILED' && (
-                            <div style={{ padding: '16px', background: 'var(--danger-light)', borderRadius: 'var(--radius)', textAlign: 'center' }}>
-                                <p style={{ color: '#991B1B', fontSize: '14px' }}>This campaign has failed. Backers can claim refunds.</p>
+                            <div style={{ padding: '18px', background: 'var(--danger-light)', borderRadius: 'var(--radius)', textAlign: 'center', border: '1px solid rgba(239,68,68,0.15)' }}>
+                                <p style={{ color: 'var(--danger)', fontSize: '14px', fontWeight: 500 }}>This campaign has failed. Backers can claim refunds.</p>
                                 <Link to="/refunds" className="btn btn-ghost" style={{ marginTop: '12px' }}>
                                     View Refunds
                                 </Link>
@@ -402,7 +445,7 @@ export default function CampaignDetail() {
                         )}
 
                         {/* Explorer Link */}
-                        <div style={{ marginTop: '20px', paddingTop: '16px', borderTop: '1px solid var(--border)' }}>
+                        <div style={{ marginTop: '24px', paddingTop: '18px', borderTop: '1px solid var(--border)' }}>
                             <a
                                 href={`https://testnet.monadexplorer.com/address/${CONTRACT_ADDRESS}`}
                                 target="_blank"
@@ -413,7 +456,9 @@ export default function CampaignDetail() {
                                     gap: '6px',
                                     color: 'var(--text-muted)',
                                     textDecoration: 'none',
-                                    fontSize: '13px'
+                                    fontSize: '13px',
+                                    fontWeight: 500,
+                                    transition: 'color 0.2s'
                                 }}
                             >
                                 View on Monad Explorer
@@ -422,8 +467,8 @@ export default function CampaignDetail() {
                         </div>
 
                         {txHash && (
-                            <div style={{ marginTop: '12px', padding: '12px', background: 'var(--success-light)', borderRadius: 'var(--radius)', fontSize: '12px' }}>
-                                <a href={`https://testnet.monadexplorer.com/tx/${txHash}`} target="_blank" rel="noopener" style={{ color: '#166534' }}>
+                            <div style={{ marginTop: '14px', padding: '14px', background: 'var(--success-light)', borderRadius: 'var(--radius)', fontSize: '13px', border: '1px solid rgba(16,185,129,0.15)' }}>
+                                <a href={`https://testnet.monadexplorer.com/tx/${txHash}`} target="_blank" rel="noopener" style={{ color: '#059669', fontWeight: 600 }}>
                                     View transaction →
                                 </a>
                             </div>
