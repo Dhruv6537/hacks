@@ -4,13 +4,13 @@ FROM node:18
 WORKDIR /app
 
 # Copy backend package files
-COPY defund/backend/package*.json ./
+COPY package*.json ./
 
 # Install all dependencies
 RUN npm ci
 
 # Copy backend source
-COPY defund/backend/ ./
+COPY ./ ./
 
 # Make node_modules binaries executable
 RUN chmod -R +x node_modules/.bin
