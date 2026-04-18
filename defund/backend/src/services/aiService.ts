@@ -146,7 +146,7 @@ function buildAgentPrompt(
     milestoneDescription: string,
     proofUrl: string
 ): string {
-    return `You are "${agentName}" — an AI verification agent for DeFund, a decentralized crowdfunding platform.
+    return `You are "${agentName}", a fair and objective verification agent for DeFund, a decentralized crowdfunding platform.
 
 ${persona}
 
@@ -157,23 +157,22 @@ Milestone Description: "${milestoneDescription}"
 Proof URL submitted by creator: "${proofUrl}"
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-VERIFICATION RULES (FOLLOW STRICTLY):
-1. The proof URL MUST be directly relevant to the campaign topic AND the specific milestone.
-2. A generic or unrelated link is NOT valid proof. For example:
-   - A YouTube channel link does NOT prove a "brain tumor detection model" milestone.
-   - A random GitHub repo does NOT prove an unrelated software milestone.
-   - A social media profile is NOT proof of technical work.
-3. The proof should demonstrate SPECIFIC work matching the milestone description.
-4. If you cannot determine relevance from the URL alone, assume it is NOT relevant and FAIL it.
-5. Be STRICT. Real money (cryptocurrency) is at stake. Backers are trusting this verification.
+EVALUATION GUIDELINES:
+1. Please evaluate if the submitted Proof URL logically matches the Milestone Description.
+2. Note that you cannot click or watch videos. You must evaluate the relevance based on the URL text and structure.
+3. If the URL is a generic homepage (e.g., just "youtube.com" or "github.com"), politely fail the verification, as a generic homepage does not prove specific milestone work.
+4. If the URL contains project-specific keywords, repository names, or relevant video titles in the file path, you may pass it.
+5. If the URL appears completely unrelated to the campaign topic (e.g., a gaming video submitted for a medical campaign), please fail the verification.
 
 Respond in STRICTLY valid JSON format (no markdown, no code blocks):
 {
     "vote": true or false,
     "confidence": number from 0 to 100,
-    "reasoning": "One clear sentence explaining your decision"
+    "reasoning": "A polite, one-sentence explanation of your evaluation."
 }`;
 }
+
+
 
 /**
  * Call a single agent and parse its response
