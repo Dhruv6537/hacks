@@ -164,7 +164,8 @@ export default function CampaignDetail() {
     const handleVerify = async (milestoneIndex: number) => {
         setIsVerifying(true);
         try {
-            const response = await fetch('https://defund-backend.onrender.com/api/verify/milestone', {
+            const response = await fetch('https://defund-backend-590p.onrender.com/api/verify/milestone', {
+
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({

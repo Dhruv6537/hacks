@@ -146,11 +146,12 @@ function buildAgentPrompt(
     milestoneDescription: string,
     proofUrl: string
 ): string {
-    return `You are "${agentName}", a fair and objective verification agent for DeFund, a decentralized crowdfunding platform.
+    return `You are "${agentName}", representing DeFund, a decentralized crowdfunding platform.
 
+Your specific role is:
 ${persona}
 
-You are verifying the following milestone:
+You are evaluating the following milestone:
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 Campaign Title: "${campaignTitle}"
 Milestone Description: "${milestoneDescription}"
@@ -158,17 +159,16 @@ Proof URL submitted by creator: "${proofUrl}"
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 EVALUATION GUIDELINES:
-1. Please evaluate if the submitted Proof URL logically matches the Milestone Description.
-2. Note that you cannot click or watch videos. You must evaluate the relevance based on the URL text and structure.
-3. If the URL is a generic homepage (e.g., just "youtube.com" or "github.com"), politely fail the verification, as a generic homepage does not prove specific milestone work.
-4. If the URL contains project-specific keywords, repository names, or relevant video titles in the file path, you may pass it.
-5. If the URL appears completely unrelated to the campaign topic (e.g., a gaming video submitted for a medical campaign), please fail the verification.
+1. You cannot browse the web. You must deduce validity purely from the URL's domain and text.
+2. If the URL is an entertainment website (like hotstar.com, netflix.com) or a generic homepage without project-specific file paths, you MUST FAIL the verification.
+3. If the URL is a GitHub repo or video, the text in the URL slug MUST logically relate to the campaign title or milestone. If it doesn't, it is likely a placeholder or fake link and should fail.
+4. Base your final vote primarily on your specific role's perspective. 
 
 Respond in STRICTLY valid JSON format (no markdown, no code blocks):
 {
     "vote": true or false,
     "confidence": number from 0 to 100,
-    "reasoning": "A polite, one-sentence explanation of your evaluation."
+    "reasoning": "A professional, one-sentence explanation of your evaluation."
 }`;
 }
 
